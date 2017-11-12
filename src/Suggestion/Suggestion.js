@@ -33,6 +33,7 @@ export default class Suggestion {
       inputInput: null,
       inputFocus: null,
       inputBlur: null,
+      docClick: null,
     };
     this.logger = new Logger(id, setting.debug);
     
@@ -90,16 +91,16 @@ export default class Suggestion {
     this.inputEle.addEventListener("input", this.eventManager.inputInput = this.onInputEleInput.bind(this));
     this.inputEle.addEventListener("focus", this.eventManager.inputFocus = this.onInputEleFocus.bind(this));
     
-    // TOdo: Change this to on click outside then hide
-    this.inputEle.addEventListener("blur", this.eventManager.inputBlur = this.onInputEleBlur.bind(this));
+    /**
+     * Detect and handle click outside of suggestion container
+     */
+    document.addEventListener('click', this.eventManager.docClick = this.onDocumentClicked.bind(this));
   }
   
   stopListener() {
     this.inputEle.removeEventListener("input", this.eventManager.inputInput);
     this.inputEle.removeEventListener("focus", this.eventManager.inputFocus);
-    
-    // TOdo: Change this to on click outside then hide
-    this.inputEle.removeEventListener("blur", this.eventManager.inputBlur);
+    document.addEventListener('click', this.eventManager.docClick);
   }
   
   onInputEleInput () {
@@ -114,8 +115,21 @@ export default class Suggestion {
   onInputEleFocus() {
     this.showSuggestion();
   }
-  onInputEleBlur() {
-    this.hideSuggestion();
+  
+  /**
+   * Can use Element.closest() but its very experimental, not safe
+   * Can use Element.closest() polyfill with Element.matches(), but matches() is non-standard itself
+   * Use node.contains()
+   *
+   * TODO: might need 200px on mobile screen so that we can click outside, 400px is too tall
+   *
+   * @param event
+   */
+  onDocumentClicked(event) {
+    const isClickedInside = this.containerNode.contains(event.target);
+    if (!isClickedInside) {
+      this.hideSuggestion();
+    }
   }
   
   initDatabase() {
