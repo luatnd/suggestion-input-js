@@ -1,3 +1,6 @@
+import polyfill from './polyfill/index.js';
+polyfill();
+
 import Suggestion from './Suggestion/Suggestion.js';
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
