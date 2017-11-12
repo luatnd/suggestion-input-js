@@ -1,6 +1,6 @@
 $pageBgImg: "./img/ahead-2551465_1920.jpg";
 body {
-  background: url($pageBgImg) no-repeat;
+  background: url($pageBgImg) no-repeat fixed;
   font-family: Arial,Helvetica,sans-serif;
 }
 .page {
@@ -44,8 +44,19 @@ $col: 6;
   }
 }
 
+.box-form {
+  background: rgba(255,255,255,0.2);
+  padding: 12px;
+  border-radius: 3px;
+  box-shadow: 0 1px 6px 0 #bfbc88;
+
+  .box-form--title {
+    margin-top: 8px;
+  }
+}
+
 .submit-btn {
-  margin-top: 30px;
+  margin-top: 15px;
 }
 
 .page-title{

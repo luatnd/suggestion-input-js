@@ -1,5 +1,5 @@
 body {
-  background: url("./img/ahead-2551465_1920.jpg") no-repeat;
+  background: url("./img/ahead-2551465_1920.jpg") no-repeat fixed;
   font-family: Arial,Helvetica,sans-serif; }
 
 .page {
@@ -77,8 +77,17 @@ body {
 .col-12 {
   width: 100%; }
 
+.box-form {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 12px;
+  border-radius: 3px;
+  -webkit-box-shadow: 0 1px 6px 0 #bfbc88;
+          box-shadow: 0 1px 6px 0 #bfbc88; }
+  .box-form .box-form--title {
+    margin-top: 8px; }
+
 .submit-btn {
-  margin-top: 30px; }
+  margin-top: 15px; }
 
 .page-title {
   color: #443; }
