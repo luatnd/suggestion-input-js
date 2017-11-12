@@ -1,0 +1,44 @@
+<html>
+<head>
+    <title>The demo</title>
+    <meta charset="UTF-8">
+    <!--
+    Module load method is CORS enabled.
+    So to try the module load method, you need to run this page by http[s] protocol,
+    Origin is `null` while using file:// protocol => Is not allowed
+    -->
+
+    <!--
+    Using this option when using http://
+    -->
+    <!-- in case ES6 modules are supported -->
+    <script src="../src/index.js" type="module"></script>
+    <!-- in case ES6 modules aren't supported -->
+    <script src="../dist/InputSuggestion.js" defer nomodule></script>
+
+    <!--
+    Using this option when using file://
+    -->
+    <!--<script src="../dist/bundle.js" defer></script>-->
+</head>
+<body>
+<h1>hello world</h1>
+<input type="text" data-sg-id="sg-appstore-ios">
+
+
+<script type="module">
+  console.log('this is loaded final');
+  //  import Suggestion from 'Suggestion';
+  const sgInstance1 = new InputSuggestion('sg-appstore-ios');
+
+</script>
+<script nomodule>
+  console.log('this is loaded final [no module]');
+  window.addEventListener('DOMContentLoaded', function () {
+    var sgInstance1 = new InputSuggestion('sg-appstore-ios');
+  });
+
+
+</script>
+</body>
+</html>

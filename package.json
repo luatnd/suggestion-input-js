@@ -1,0 +1,18 @@
+{
+  "name": "suggestion-input-js",
+  "version": "1.0.0",
+  "description": "Plugin which transform input into a suggestion-able input",
+  "author": "luatnd",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "bundle": "webpack --config config/webpack.config.js",
+    "build": "echo TODO",
+    "test": "echo \"TODO: no test specified\""
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "webpack": "^3.8.1"
+  }
+}
