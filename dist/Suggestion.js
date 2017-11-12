@@ -354,13 +354,22 @@ class Suggestion {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__assets_css_Suggestion_scss__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__assets_css_Suggestion_scss___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__assets_css_Suggestion_scss__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__assets_css_index_scss__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__assets_css_index_scss___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__assets_css_index_scss__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__assets_css_Suggestion_scss__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__assets_css_Suggestion_scss___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__assets_css_Suggestion_scss__);
+
 
 
 
 /***/ }),
 /* 7 */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 8 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
