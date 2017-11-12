@@ -2,6 +2,10 @@
 <head>
     <title>The demo</title>
     <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="../dist/css/index.css">
+    <link rel="stylesheet" href="../dist/css/main.css">
+
     <!--
     Module load method is CORS enabled.
     So to try the module load method, you need to run this page by http[s] protocol,
@@ -22,21 +26,43 @@
     <!--<script src="../dist/bundle.js" defer></script>-->
 </head>
 <body>
-<h1>hello world</h1>
-<input type="text" data-sg-id="sg-appstore-ios" class="inputTransform">
+
+<div class="page">
+    <div class="row">
+        <div class="col col-6">
+            <h3>First suggestion demo</h3>
+            <input type="text" data-sg-id="sg-appstore-top-free1" class="inputTransform">
+        </div>
+        <div class="col col-6">
+            <h3>This is 2nd instance</h3>
+            <input type="text" data-sg-id="sg-appstore-top-paid1" class="inputTransform">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col col-6">
+            <h3>Another suggestion demo</h3>
+            <input type="text" data-sg-id="sg-appstore-top-free2" class="inputTransform">
+        </div>
+        <div class="col col-6">
+
+        </div>
+    </div>
+
+</div>
+
 
 
 <script type="module">
   console.log('this is loaded final');
   //  import Suggestion from 'Suggestion';
-  const sgInstance1 = new Suggestion('sg-appstore-ios');
+  const sgInstance1 = new Suggestion('sg-appstore-top-free1');
   //setTimeout(() => {sgInstance1.destruct()}, 5000);
 
 </script>
 <script nomodule>
   console.log('this is loaded final [no module]');
   window.addEventListener('DOMContentLoaded', function () {
-    var sgInstance1 = new Suggestion('sg-appstore-ios');
+    var sgInstance1 = new Suggestion('sg-appstore-top-free1');
   });
 
 

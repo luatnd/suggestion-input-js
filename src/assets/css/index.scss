@@ -1,0 +1,25 @@
+.page {
+  width: 1000px;
+  margin:0 auto;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: stretch;
+}
+
+.col {
+  padding: 12px;
+  &:first-child { padding-left: 0; }
+  &:last-child { padding-right: 0; }
+}
+
+$cols: 12;
+$col: 6;
+@for $i from 1 through $cols {
+  .col-#{$i} {
+    width: $i / $cols * 100%;
+  }
+}
