@@ -14,7 +14,7 @@
     <!-- in case ES6 modules are supported -->
     <script src="../src/index.js" type="module"></script>
     <!-- in case ES6 modules aren't supported -->
-    <script src="../dist/InputSuggestion.js" defer nomodule></script>
+    <script src="../dist/Suggestion.js" defer nomodule></script>
 
     <!--
     Using this option when using file://
@@ -29,13 +29,13 @@
 <script type="module">
   console.log('this is loaded final');
   //  import Suggestion from 'Suggestion';
-  const sgInstance1 = new InputSuggestion('sg-appstore-ios');
+  const sgInstance1 = new Suggestion('sg-appstore-ios');
 
 </script>
 <script nomodule>
   console.log('this is loaded final [no module]');
   window.addEventListener('DOMContentLoaded', function () {
-    var sgInstance1 = new InputSuggestion('sg-appstore-ios');
+    var sgInstance1 = new Suggestion('sg-appstore-ios');
   });
 
 

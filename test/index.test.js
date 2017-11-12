@@ -1,6 +1,6 @@
-import InputSuggestion from '../src/index';
+import Suggestion from '../src/index';
 
-test('Can init with ID', () => {
+test('Is instance', () => {
   const id = 'the-foo-id';
-  expect(new InputSuggestion(id).id).toBe(id);
+  expect(new Suggestion(id)).toBeInstanceOf(Suggestion);
 });

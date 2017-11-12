@@ -69,19 +69,13 @@
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* WEBPACK VAR INJECTION */(function(module) {
-class InputSuggestion {
-  constructor(id) {
-    console.log('Hi Suggestion: ', id);
-  }
-}
-/* harmony export (immutable) */ __webpack_exports__["default"] = InputSuggestion;
+/* WEBPACK VAR INJECTION */(function(module) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Suggestion_Suggestion_js__ = __webpack_require__(2);
 
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
-  module.exports = InputSuggestion;
+  module.exports = __WEBPACK_IMPORTED_MODULE_0__Suggestion_Suggestion_js__["a" /* default */];
 else
-  window.InputSuggestion = InputSuggestion;
+  window.Suggestion = __WEBPACK_IMPORTED_MODULE_0__Suggestion_Suggestion_js__["a" /* default */];
 
 console.log('plugin: all done');
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1)(module)))
@@ -114,6 +108,26 @@ module.exports = function(originalModule) {
 	}
 	return module;
 };
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
+ *  goal: Init input
+ *  Put input inside a container
+ *  Init a suggestion box that show the inputted value
+ */
+class Suggestion {
+  constructor(id) {
+    this.id = id;
+    this.inputEle = document.querySelector(`[data-sg-id="${id}"]`);
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Suggestion;
+
 
 
 /***/ })

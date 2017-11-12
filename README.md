@@ -27,6 +27,16 @@ yarn bundle
 yarn build
 ```
 
+Test:
+```
+# Test all
+yarn test
+
+# Test 1 file only
+yarn jest test/Suggestion/Suggestion.test.js
+yarn test test/Suggestion/Suggestion.test.js
+```
+
 
 # Compatible (DRAFT - not completed)
 ### Specs

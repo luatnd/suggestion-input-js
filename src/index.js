@@ -1,14 +1,8 @@
-
-export default class InputSuggestion {
-  constructor(id) {
-    console.log('Hi Suggestion: ', id);
-    this.id = id;
-  }
-}
+import Suggestion from './Suggestion/Suggestion.js';
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
-  module.exports = InputSuggestion;
+  module.exports = Suggestion;
 else
-  window.InputSuggestion = InputSuggestion;
+  window.Suggestion = Suggestion;
 
 console.log('plugin: all done');

@@ -2,7 +2,7 @@
 const path = require('path');
 //const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
-const libraryName = 'InputSuggestion'
+const libraryName = 'Suggestion'
 const outputFile = `${libraryName}.js`
 
 module.exports = {
