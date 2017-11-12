@@ -6,6 +6,7 @@
   "license": "MIT",
   "main": "index.js",
   "scripts": {
+    "watch": "webpack --config config/webpack.config.js --watch",
     "bundle": "webpack --config config/webpack.config.js",
     "build": "echo TODO",
     "test": "jest"
