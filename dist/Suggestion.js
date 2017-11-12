@@ -200,6 +200,7 @@ function addReplaceWith(){
 // TODO: change all class name into BEM
 // TODO: change this to defaultSetting, and allow to pass the setting
 const setting = {
+  debug: true,
   container: {
     className: "suggestion-container"
   },
@@ -209,6 +210,7 @@ const setting = {
   },
   suggestionList: {
     className: "suggestion-list",
+    activeClassName: "show",
     history:{
       className: "suggestion-list-history"
     }
@@ -225,6 +227,7 @@ class Suggestion {
       inputFocus: null,
       inputBlur: null,
     };
+    this.logger = new Logger(id, setting.debug);
     
     this.initUI();
     this.startListener();
@@ -302,7 +305,6 @@ class Suggestion {
     }, setting.suggestionInput.searchDelay);
   }
   onInputEleFocus() {
-    console.log("this: ", this);
     this.showSuggestion();
   }
   onInputEleBlur() {
@@ -310,7 +312,7 @@ class Suggestion {
   }
   
   initDatabase() {
-    console.log("TODO:");
+    this.logger.log("TODO:");
   }
   
   showSuggestion() {
@@ -347,6 +349,19 @@ class Suggestion {
 /* harmony export (immutable) */ __webpack_exports__["a"] = Suggestion;
 
 
+class Logger {
+  constructor(id, debug = false) {
+    this.id = id;
+    this.debug = debug;
+  }
+  
+  log() {
+    const args = [].slice.call(arguments);
+    if (setting.debug) {
+      console.log(`[${this.id}]`, ...args);
+    }
+  }
+}
 
 /***/ }),
 /* 6 */
