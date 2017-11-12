@@ -1,6 +1,12 @@
 # Introduce
 TBR
 
+Features:
+
+* Input delay after 200ms
+* Polyfill
+* ~~Linter~~
+
 # How to use
 TBR
 
@@ -40,27 +46,34 @@ yarn test test/Suggestion/Suggestion.test.js
 
 # Compatible (DRAFT - not completed)
 ### Specs
-This plugin use:
+This plugin use (~~strikethrough~~ mean this compatible was not investigated):
 
-* spread operator {…} : safe for all major
-* arrow fn: safe for all major
-* Promise: safe for all major
-* Async await: safe for all major
+* Class
+* let/const
+* ~~spread operator {…}~~
+* arrow fn
+* ~~Promise~~
+* Async await
 
 ### Supported browser
 ##### Desktop
-| Feature       | Chrome | Edge	| Firefox | IE | Opera | Safari |
-| ------------- |-------:| ----:|   -----:| --:| -----:| -----: |
-| Async await   |55	     | Yes	| 52	  | No | 42	   |  10.1  |
-|---------------|---     |---   |---      |--- |---    |---     |
-| ALL           |55	     | Yes	| 52	  | No | 42	   |  10.1  |
+| Feature       | Chrome | Edge	| Firefox | IE | Opera  | Safari |
+| ------------- |-------:| ----:|   -----:| --:|  -----:| -----: |
+| Async await   |55	     | Yes	| 52	  | No | 42		|  10.1  |
+| Class         |49	     | 13	| 45	  | No | 43		|  9     |
+| Const/let		|21		 | Yes	| 36	  | 11 | Yes	|  5.1	 |
+| Arrow fn		|45		 | Yes	| 22	  | No | 32		|  10	 |
+|---------------|---     |---   |---      |--- |---     |---     |
+| ALL(max)      |55	     | 13	| 52	  | No | 43		|  10.1  |
 
 ##### Mobile
 | Feature       | Android webview | Chrome for Android |  Edge mobile   |Firefox Android| IE    | iOS Safari | Opera Android |
 | ------------- |-------:         | ----:              |   -----:       | --:           | -----:| -----:     |---:           |
 | Async await   |Yes	          | 55	               |Yes             | 52            |No     | 42         |  10.1         |
+| Class         |?	              | Yes	               |13	            | 45			|No		| ?			 |  9			 |
+| const/let		|Yes              | Yes	               |Yes	            | 36			|11		| Yes		 |  Yes			 |
 |---------------|---|---|---|---|---|---|---|
-| ALL           |Yes	          | 55	               |Yes             | 52            |No     | 42         |  10.1         |
+| ALL           |Yes (?)		  | 55	               |Yes             | 52            |No     | 42         |  10.1		 |
 
 
 
