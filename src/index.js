@@ -2,6 +2,7 @@
 export default class InputSuggestion {
   constructor(id) {
     console.log('Hi Suggestion: ', id);
+    this.id = id;
   }
 }
 

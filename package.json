@@ -8,11 +8,17 @@
   "scripts": {
     "bundle": "webpack --config config/webpack.config.js",
     "build": "echo TODO",
-    "test": "echo \"TODO: no test specified\""
+    "test": "jest"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
+    "babel-preset-env": "^1.6.1",
+    "jest": "^21.2.1",
     "webpack": "^3.8.1"
+  },
+  "babel": {
+    "presets": [
+      "env"
+    ]
   }
 }
