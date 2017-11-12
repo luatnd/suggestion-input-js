@@ -4,9 +4,9 @@ const fs = require('fs');
 const url = require('url');
 
 const autoprefixer = require('autoprefixer');
-const postCSSFlexBugsFix = require('postcss-flexbugs-fixes');
 //const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const libraryName = 'Suggestion'
 const outputFile = `${libraryName}.js`
@@ -70,7 +70,10 @@ module.exports = {
               //  loader: "style-loader" // creates style nodes from JS strings
               //},
               {
-                loader: "css-loader" // translates CSS into CommonJS
+                loader: "css-loader", // translates CSS into CommonJS
+                options: {
+                  url: false, // disable css image url resolution, use direct copy file instead
+                }
               }, {
                 loader: require.resolve('postcss-loader'),
                 options: {
@@ -105,5 +108,14 @@ module.exports = {
     new ExtractTextPlugin({
       filename: cssFilename,
     }),
+    
+    // Copy file
+    new CopyWebpackPlugin([
+      {
+        context: './src/assets/css', // switch context to source css folder (relative to project)
+        from: './img', // copy the img + its structure (relative to context)
+        to: './css/img', // (relative to outputDir `dist`)
+      },
+    ], {}),
   ],
 };
