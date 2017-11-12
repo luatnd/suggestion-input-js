@@ -41,17 +41,34 @@
     <div class="row">
         <div class="col col-6">
             <h3>Another suggestion demo</h3>
-            <input type="text" data-sg-id="sg-appstore-top-free2" class="inputTransform">
+            <form action="#" onsubmit="onFrmSubmit">
+                <input type="text" data-sg-id="sg-appstore-top-free2" class="inputTransform">
+                <button>Submit</button>
+            </form>
         </div>
         <div class="col col-6">
+            <h3>HTML CSS</h3>
+            <form action=""  onsubmit="return onFrmSubmit(this)">
+                <div class="suggestion-container">
+                    <input type="text" data-sg-id="sg-appstore-top-free__" class="inputTransform suggestion-input">
+                    <div class="suggestion-list"></div>
+                </div>
 
+                <button class="submit-btn btn btn-info">Submit</button>
+            </form>
         </div>
     </div>
 
 </div>
 
 
+<script>
+  function onFrmSubmit (formEle) {
+    alert('Input value: ' + formEle.querySelector('input[data-sg-id]').value)
 
+    return false;
+  }
+</script>
 <script type="module">
   console.log('this is loaded final');
   //  import Suggestion from 'Suggestion';
