@@ -1,6 +1,26 @@
+$pageBgImg: "./img/ahead-2551465_1920.jpg";
+body {
+  background: url($pageBgImg) no-repeat;
+  font-family: Arial,Helvetica,sans-serif;
+}
 .page {
+  position: relative;
   width: 1000px;
   margin:0 auto;
+  padding: 20px;
+
+  border-radius:5px;
+  //background-color: rgba(255,255,255,0.2);
+  box-shadow: 0 5px 20px 0px rgba(0, 0, 0, 0.5);
+}
+.page--bg-image{
+  position: absolute; z-index: -1;
+  display: block;
+  left: 0; right: 0; top:0;
+  width: 100%;
+  height: 100%;
+  background: url($pageBgImg) no-repeat fixed;
+  filter: blur(15px);
 }
 
 .row {
@@ -26,4 +46,8 @@ $col: 6;
 
 .submit-btn {
   margin-top: 30px;
+}
+
+.page-title{
+  color: #443;
 }
