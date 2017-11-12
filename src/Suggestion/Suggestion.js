@@ -123,11 +123,11 @@ export default class Suggestion {
   }
   
   showSuggestion() {
-    console.log("TODO:");
+    this.suggestListNode.classList.add(setting.suggestionList.activeClassName);
   }
   
   hideSuggestion() {
-    console.log("TODO:");
+    this.suggestListNode.classList.remove(setting.suggestionList.activeClassName);
   }
   
   updateSuggestionList() {
