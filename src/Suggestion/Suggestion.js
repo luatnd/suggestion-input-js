@@ -24,18 +24,23 @@ const setting = {
   },
 }
 export default class Suggestion {
-  constructor(id) {
+  constructor(id, data) {
     this.id = id;
+    this.data = data;
+    
     this.inputEle = document.querySelector(`[data-sg-id="${id}"]`);
     this.containerNode = null;
     this.suggestListNode = null;
+    
     this.eventManager = {
       inputInput: null,
       inputFocus: null,
       inputBlur: null,
       docClick: null,
     };
+    
     this.logger = new Logger(id, setting.debug);
+    
     
     this.initUI();
     this.startListener();

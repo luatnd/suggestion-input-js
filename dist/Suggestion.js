@@ -65,20 +65,12 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(1);
-module.exports = __webpack_require__(6);
-
-
-/***/ }),
-/* 1 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* WEBPACK VAR INJECTION */(function(module) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__polyfill_index_js__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Suggestion_Suggestion_js__ = __webpack_require__(5);
+/* WEBPACK VAR INJECTION */(function(module) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__polyfill_index_js__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Suggestion_Suggestion_js__ = __webpack_require__(4);
 
 Object(__WEBPACK_IMPORTED_MODULE_0__polyfill_index_js__["a" /* default */])();
 
@@ -90,10 +82,10 @@ else
   window.Suggestion = __WEBPACK_IMPORTED_MODULE_1__Suggestion_Suggestion_js__["a" /* default */];
 
 console.log('plugin: all done');
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2)(module)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1)(module)))
 
 /***/ }),
-/* 2 */
+/* 1 */
 /***/ (function(module, exports) {
 
 module.exports = function(originalModule) {
@@ -123,11 +115,11 @@ module.exports = function(originalModule) {
 
 
 /***/ }),
-/* 3 */
+/* 2 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__DOM_js__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__DOM_js__ = __webpack_require__(3);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function () {
@@ -135,7 +127,7 @@ module.exports = function(originalModule) {
 });
 
 /***/ }),
-/* 4 */
+/* 3 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -187,7 +179,7 @@ function addReplaceWith(){
 
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -217,17 +209,23 @@ const setting = {
   },
 }
 class Suggestion {
-  constructor(id) {
+  constructor(id, data) {
     this.id = id;
+    this.data = data;
+    
     this.inputEle = document.querySelector(`[data-sg-id="${id}"]`);
     this.containerNode = null;
     this.suggestListNode = null;
+    
     this.eventManager = {
       inputInput: null,
       inputFocus: null,
       inputBlur: null,
+      docClick: null,
     };
+    
     this.logger = new Logger(id, setting.debug);
+    
     
     this.initUI();
     this.startListener();
@@ -283,16 +281,16 @@ class Suggestion {
     this.inputEle.addEventListener("input", this.eventManager.inputInput = this.onInputEleInput.bind(this));
     this.inputEle.addEventListener("focus", this.eventManager.inputFocus = this.onInputEleFocus.bind(this));
     
-    // TOdo: Change this to on click outside then hide
-    this.inputEle.addEventListener("blur", this.eventManager.inputBlur = this.onInputEleBlur.bind(this));
+    /**
+     * Detect and handle click outside of suggestion container
+     */
+    document.addEventListener('click', this.eventManager.docClick = this.onDocumentClicked.bind(this));
   }
   
   stopListener() {
     this.inputEle.removeEventListener("input", this.eventManager.inputInput);
     this.inputEle.removeEventListener("focus", this.eventManager.inputFocus);
-    
-    // TOdo: Change this to on click outside then hide
-    this.inputEle.removeEventListener("blur", this.eventManager.inputBlur);
+    document.addEventListener('click', this.eventManager.docClick);
   }
   
   onInputEleInput () {
@@ -307,8 +305,21 @@ class Suggestion {
   onInputEleFocus() {
     this.showSuggestion();
   }
-  onInputEleBlur() {
-    this.hideSuggestion();
+  
+  /**
+   * Can use Element.closest() but its very experimental, not safe
+   * Can use Element.closest() polyfill with Element.matches(), but matches() is non-standard itself
+   * Use node.contains()
+   *
+   * TODO: might need 200px on mobile screen so that we can click outside, 400px is too tall
+   *
+   * @param event
+   */
+  onDocumentClicked(event) {
+    const isClickedInside = this.containerNode.contains(event.target);
+    if (!isClickedInside) {
+      this.hideSuggestion();
+    }
   }
   
   initDatabase() {
@@ -316,11 +327,11 @@ class Suggestion {
   }
   
   showSuggestion() {
-    console.log("TODO:");
+    this.suggestListNode.classList.add(setting.suggestionList.activeClassName);
   }
   
   hideSuggestion() {
-    console.log("TODO:");
+    this.suggestListNode.classList.remove(setting.suggestionList.activeClassName);
   }
   
   updateSuggestionList() {
@@ -362,32 +373,6 @@ class Logger {
     }
   }
 }
-
-/***/ }),
-/* 6 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__assets_css_index_scss__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__assets_css_index_scss___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__assets_css_index_scss__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__assets_css_Suggestion_scss__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__assets_css_Suggestion_scss___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__assets_css_Suggestion_scss__);
-
-
-
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports) {
-
-// removed by extract-text-webpack-plugin
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports) {
-
-// removed by extract-text-webpack-plugin
 
 /***/ })
 /******/ ]);

@@ -8,8 +8,7 @@ const autoprefixer = require('autoprefixer');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-const libraryName = 'Suggestion'
-const outputFile = `${libraryName}.js`
+const outputFile = `[name].js`;
 const cssFilename = 'css/[name].css';
 
 /**
@@ -46,10 +45,13 @@ const extractTextPluginOptions = shouldUseRelativeAssetPaths
 
 
 module.exports = {
-  entry: [
-    './src/index.js',
-    './src/Suggestion/cssLoader.js',
-  ],
+  entry: {
+    // 'OutputPath': 'EntryPath',
+    'Suggestion': './src/index.js',
+    'Demo': './src/demo.js',
+    'DemoStyles': './src/assets/DemoStyleLoader.js',
+    'SuggestionStyles': './src/Suggestion/StyleLoader.js',
+  },
   output: {
     filename: outputFile,
     path: path.resolve(__dirname, '..', 'dist'),

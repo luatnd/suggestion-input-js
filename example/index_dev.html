@@ -3,8 +3,8 @@
     <title>The demo</title>
     <meta charset="UTF-8">
 
-    <link rel="stylesheet" href="../dist/css/index.css">
-    <link rel="stylesheet" href="../dist/css/main.css">
+    <link rel="stylesheet" href="../dist/css/SuggestionStyles.css">
+    <link rel="stylesheet" href="../dist/css/DemoStyles.css">
 
     <!--
     Module load method is CORS enabled.
@@ -15,15 +15,15 @@
     <!--
     Using this option when using http://
     -->
-    <!-- in case ES6 modules are supported -->
+    <!-- in case ES6 modules are supported: Dev -->
     <script src="../src/index.js" type="module"></script>
-    <!-- in case ES6 modules aren't supported -->
+    <!-- in case ES6 modules aren't supported: Bundled -->
     <script src="../dist/Suggestion.js" defer nomodule></script>
 
     <!--
     Using this option when using file://
     -->
-    <!--<script src="../dist/bundle.js" defer></script>-->
+    <!--<script src="../dist/Suggestion.js" defer></script>-->
 </head>
 <body>
 
@@ -121,9 +121,10 @@
 
 
 
-
+<!--
 <script type="module">
   console.log('this is loaded final');
+
   const sgInstanceAppstoreTopFree1 = new Suggestion('sg-appstore-top-free1');
   const sgInstanceAppstoreTopPaid1 = new Suggestion('sg-appstore-top-paid1');
   const sgInstanceAppstoreTopPaid2 = new Suggestion('sg-appstore-top-paid2');
@@ -131,14 +132,18 @@
 
 </script>
 <script nomodule>
-  console.log('this is loaded final [no module]');
+  console.log('this is loaded before `defer script` [no module]');
   window.addEventListener('DOMContentLoaded', function () {
     const sgInstanceAppstoreTopFree1 = new Suggestion('sg-appstore-top-free1');
     const sgInstanceAppstoreTopPaid1 = new Suggestion('sg-appstore-top-paid1');
     const sgInstanceAppstoreTopPaid2 = new Suggestion('sg-appstore-top-paid2');
   });
 </script>
+-->
 
+<!-- Script for Demo page, this replace script commented above -->
+<script src="../src/demo.js" type="module"></script>
+<script src="../dist/Demo.js" defer nomodule></script>
 
 
 </body>
