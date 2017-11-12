@@ -14,6 +14,41 @@ test('Can init with ID', () => {
   expect(new Suggestion(id).id).toBe(id);
 });
 
+/**
+ * Int will dangerous for comparison, so need string
+ */
+test('Can Init data, list of app with appId is String', () => {
+  document.body.innerHTML =
+    `<div>
+      <input type="text" data-sg-id="sg-appstore-ios" class="initialClass1">
+    </div>`
+  ;
+  
+  const data = {
+    1: {
+      id: "1",
+      icon: 'http://img.com/icon_url',
+      name: 'Google Chrome',
+    },
+    2: {
+      id: "2",
+      icon: 'http://img.com/icon_url',
+      name: 'Read Booker',
+    },
+    3: {
+      id: "3",
+      icon: 'http://img.com/icon_url',
+      name: 'Boom Game',
+    },
+  }
+  
+  const id = "sg-appstore-ios";
+  const sgIntance = new Suggestion(id, data);
+  
+  expect(sgIntance.getData()['1'].id).toBe('1');
+  expect(sgIntance.getData()['1'].name).toBe('Google Chrome');
+});
+
 test('Can init inputEle', () => {
   document.body.innerHTML =
     `<div>

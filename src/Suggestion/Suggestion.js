@@ -31,6 +31,7 @@ export default class Suggestion {
     this.inputEle = document.querySelector(`[data-sg-id="${id}"]`);
     this.containerNode = null;
     this.suggestListNode = null;
+    this.listNode = null; // Migrate to another class
     
     this.eventManager = {
       inputInput: null,
@@ -43,6 +44,7 @@ export default class Suggestion {
     
     
     this.initUI();
+    this.updateSuggestionList(this.getData()); // Initial suggestion list
     this.startListener();
     this.initDatabase();
   }
@@ -87,8 +89,10 @@ export default class Suggestion {
     const suggestListNode = document.createElement('div');
     suggestListNode.classList.add(setting.suggestionList.className);
     containerNode.appendChild(suggestListNode);
-    
     this.suggestListNode = suggestListNode;
+  
+    this.listNode = document.createElement('ul');
+    this.suggestListNode.appendChild(this.listNode);
   }
   
   startListener() {
@@ -138,7 +142,7 @@ export default class Suggestion {
   }
   
   initDatabase() {
-    this.logger.log("TODO:");
+    this.logger.log("TODO: initDatabase");
   }
   
   showSuggestion() {
@@ -149,8 +153,83 @@ export default class Suggestion {
     this.suggestListNode.classList.remove(setting.suggestionList.activeClassName);
   }
   
-  updateSuggestionList() {
+  /**
+   * List Items of this suggestion instance
+   * Data structure:
+   *    data[app.id] = {
+   *      id: string,
+   *      icon: string,
+   *      name: string,
+   *    }
+   *
+   * @returns {*}
+   */
+  getData() {
+    return this.data;
+  }
+  setData(data) {
+    this.data = data;
+  }
   
+  /**
+   * Some part of this.data
+   *
+   * Current update method:
+   *    Clear all child of DOM node listNode
+   *    Append new child for listNode
+   *
+   * @param items
+   */
+  updateSuggestionList(items) {
+    if (this.listNode === null) {
+      this.logger.log('ERROR: listNode is null');
+      return;
+    }
+    
+    this.listNode.innerHTML = null;
+    
+    for (let key in items) {
+      if (items.hasOwnProperty(key)) {
+        const app = items[key];
+        
+        /*
+        <li>
+            <div class="flex">
+                <img class="item-img" alt="alt" src="http://is4.mzstatic.com/image/thumb/Purple128/v4/32/7e/ce/327ece67-3ebe-a39b-fb34-71ca3d917823/AppIcon-1x_U007emarketing-85-220-7.png/200x200bb.png">
+                <span class="item-title">Tool glasses</span>
+            </div>
+            <div class="item-btn"></div>
+        </li>
+        
+        TODO: Allow configure className of these elements
+         */
+        const iNode = document.createElement('li');
+  
+        const iDiv = document.createElement('div');
+        iDiv.classList.add('flex');
+        
+        const iBtn = document.createElement('div');
+        iBtn.classList.add('item-btn');
+        
+        const iIcon = document.createElement('img');
+        iIcon.classList.add('item-img');
+        iIcon.setAttribute('alt', app.name);
+        iIcon.setAttribute('src', app.icon);
+        
+        const iName = document.createElement('span');
+        iName.classList.add('item-title');
+        iName.innerText = app.name;
+        
+        iDiv.appendChild(iIcon);
+        iDiv.appendChild(iName);
+        iNode.appendChild(iDiv);
+        iNode.appendChild(iBtn);
+        
+        
+        // Append to list
+        this.listNode.appendChild(iNode);
+      }
+    }
   }
   
   updateHistoryList() {
