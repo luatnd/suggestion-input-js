@@ -5,9 +5,8 @@ body {
 }
 .page {
   position: relative;
-  width: 1000px;
   margin:0 auto;
-  padding: 20px;
+  padding: 15px;
 
   border-radius:5px;
   //background-color: rgba(255,255,255,0.2);
@@ -23,24 +22,30 @@ body {
   filter: blur(15px);
 }
 
-.row {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: stretch;
-}
-
-.col {
-  padding: 12px;
-  &:first-child { padding-left: 0; }
-  &:last-child { padding-right: 0; }
-}
-
 $cols: 12;
 $col: 6;
-@for $i from 1 through $cols {
-  .col-#{$i} {
-    width: $i / $cols * 100%;
+@media (min-width: 480px) {
+  .page {
+    width: 1000px;
+    padding: 20px;
+  }
+  .row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+  }
+
+  .col {
+    padding: 12px;
+    &:first-child { padding-left: 0; }
+    &:last-child { padding-right: 0; }
+  }
+
+  @for $i from 1 through $cols {
+    .col-#{$i} {
+      width: $i / $cols * 100%;
+    }
   }
 }
 
