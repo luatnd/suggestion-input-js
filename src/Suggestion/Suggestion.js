@@ -78,7 +78,8 @@ export default class Suggestion {
     this.stateActive = false; // The dropDown is showing (input can focus or not)
     this.stateSuggestItems = {}; // List of item in suggest box
     this.stateHistoryItems = {}; // List of item in history box
-    this.stateFocusedItemKey = null; // The selected item `key` in this.data (get `key` by this.getId(item.id))
+    this.stateFocusedItemKey = null; // The Focused (up/down key position) item `key` in this.data (get `key` by this.getId(item.id))
+    this.stateSelectedItemKey = null; // The selected item `key` in this.data (get `key` by this.getId(item.id))
     
     this.initUI();
     this.updateStateSuggestItems(this.getData()); // Initial suggestion list
@@ -129,6 +130,7 @@ export default class Suggestion {
     this.suggestListNode = suggestListNode;
   
     this.listNode = document.createElement('ul');
+    this.listNode.setAttribute('tabindex', 1);
     this.suggestListNode.appendChild(this.listNode);
   }
   
@@ -203,6 +205,7 @@ export default class Suggestion {
           this.onUpKey();
           break;
         case KEY.RETURN:
+          event.preventDefault();
           this.onEnterKey();
           break;
       }
@@ -210,24 +213,28 @@ export default class Suggestion {
   }
   
   onUpKey() {
-    const nextItemKey = Suggestion.getPrevKey(this.getData(), this.stateFocusedItemKey);
+    const nextItemKey = Suggestion.getPrevKey(this.stateSuggestItems, this.stateFocusedItemKey);
     this.updateStateFocusedItemKey(nextItemKey);
   }
   
   onDownKey() {
-    const prevItemKey = Suggestion.getNextKey(this.getData(), this.stateFocusedItemKey);
+    const prevItemKey = Suggestion.getNextKey(this.stateSuggestItems, this.stateFocusedItemKey);
     this.updateStateFocusedItemKey(prevItemKey);
   }
   
   onEnterKey() {
-    this.logger.log('Enter');
+    // Enter then choose focused item is selected
+    const selectedItemKey = this.stateFocusedItemKey;
+    
+    this.updateStateSelectedItemKey(selectedItemKey);
   }
   
   onListNodeClicked(event) {
     const clickedListItem = event.target.closest(`.${setting.suggestionList.className} > ul > li`);
     if (clickedListItem !== null) {
-      const item = this.getDataItemByKey(clickedListItem.getAttribute('data-key'));
-      this.updateInputVal(item.name);
+      
+      this.updateStateSelectedItemKey(clickedListItem.getAttribute('data-key'));
+      
     } else {
       this.logger.log('Error: Can not found the item?');
     }
@@ -294,6 +301,38 @@ export default class Suggestion {
   
   /**
    * Using as a setter + trigger UI change.
+   * @param {string} itemKey
+   */
+  updateStateSelectedItemKey(itemKey) {
+    if (itemKey === this.stateSelectedItemKey) {
+      return;
+    }
+    
+    // Remove active from old node
+    if (this.stateSelectedItemKey !== null) {
+      const prevActiveNode = this.listNode.querySelector(`[data-key="${this.stateSelectedItemKey}"]`);
+      if (prevActiveNode) {
+        // prevActiveNode can be null because the current filtered list can not ensure contain old select item
+        prevActiveNode.classList.remove('selected');
+      }
+    }
+    
+    // Add active to new node
+    const activeNode = this.listNode.querySelector(`[data-key="${itemKey}"]`);
+    if (activeNode) {
+      activeNode.classList.add('selected');
+    }
+    
+    // Update state
+    this.stateSelectedItemKey = itemKey;
+  
+    // Trigger UI change to input
+    const item = this.getDataItemByKey(itemKey);
+    this.updateInputVal(item.name);
+  }
+  
+  /**
+   * Using as a setter + trigger UI change.
    * @param {string} focusedItemKey
    */
   updateStateFocusedItemKey(focusedItemKey) {
@@ -304,7 +343,10 @@ export default class Suggestion {
     // Remove active from old node
     if (this.stateFocusedItemKey !== null) {
       const prevActiveNode = this.listNode.querySelector(`[data-key="${this.stateFocusedItemKey}"]`);
-      prevActiveNode.classList.remove('focused');
+      if (prevActiveNode) {
+        // prevActiveNode can be null because the current filtered list can not ensure contain old select item
+        prevActiveNode.classList.remove('focused');
+      }
     }
   
     // Add active to new node
@@ -421,6 +463,7 @@ export default class Suggestion {
       return keys[0];
     } else {
       let currIndex = keys.indexOf(currentKey);
+      console.log("currIndex: ", currIndex);
       return (currIndex > 1) ? keys[currIndex - 1] : keys[0];
     }
   }
