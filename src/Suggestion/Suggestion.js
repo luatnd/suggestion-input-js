@@ -78,7 +78,7 @@ export default class Suggestion {
     this.stateActive = false; // The dropDown is showing (input can focus or not)
     this.stateSuggestItems = {}; // List of item in suggest box
     this.stateHistoryItems = {}; // List of item in history box
-    this.stateSelectedItemKey = null; // The selected item `key` in this.data (get `key` by this.getId(item.id))
+    this.stateFocusedItemKey = null; // The selected item `key` in this.data (get `key` by this.getId(item.id))
     
     this.initUI();
     this.updateStateSuggestItems(this.getData()); // Initial suggestion list
@@ -210,18 +210,13 @@ export default class Suggestion {
   }
   
   onUpKey() {
-this.logger.log('up');
-
-    const nextItemKey = Suggestion.getPrevKey(this.getData(), this.stateSelectedItemKey);
-console.log("nextItemKey: ", nextItemKey);
-    this.updateStateSelectedItemKey(nextItemKey);
+    const nextItemKey = Suggestion.getPrevKey(this.getData(), this.stateFocusedItemKey);
+    this.updateStateFocusedItemKey(nextItemKey);
   }
   
   onDownKey() {
-this.logger.log('down');
-    const prevItemKey = Suggestion.getNextKey(this.getData(), this.stateSelectedItemKey);
-console.log("prevItemKey: ", prevItemKey);
-    this.updateStateSelectedItemKey(prevItemKey);
+    const prevItemKey = Suggestion.getNextKey(this.getData(), this.stateFocusedItemKey);
+    this.updateStateFocusedItemKey(prevItemKey);
   }
   
   onEnterKey() {
@@ -299,27 +294,27 @@ console.log("prevItemKey: ", prevItemKey);
   
   /**
    * Using as a setter + trigger UI change.
-   * @param {string} selectedItemKey
+   * @param {string} focusedItemKey
    */
-  updateStateSelectedItemKey(selectedItemKey) {
-    if (selectedItemKey === this.stateSelectedItemKey) {
+  updateStateFocusedItemKey(focusedItemKey) {
+    if (focusedItemKey === this.stateFocusedItemKey) {
       return;
     }
     
     // Remove active from old node
-    if (this.stateSelectedItemKey !== null) {
-      const prevActiveNode = this.listNode.querySelector(`[data-key="${this.stateSelectedItemKey}"]`);
-      prevActiveNode.classList.remove('active');
+    if (this.stateFocusedItemKey !== null) {
+      const prevActiveNode = this.listNode.querySelector(`[data-key="${this.stateFocusedItemKey}"]`);
+      prevActiveNode.classList.remove('focused');
     }
   
     // Add active to new node
-    const activeNode = this.listNode.querySelector(`[data-key="${selectedItemKey}"]`);
+    const activeNode = this.listNode.querySelector(`[data-key="${focusedItemKey}"]`);
     if (activeNode) {
-      activeNode.classList.add('active');
+      activeNode.classList.add('focused');
     }
   
     // Update state
-    this.stateSelectedItemKey = selectedItemKey;
+    this.stateFocusedItemKey = focusedItemKey;
   }
   
   /**

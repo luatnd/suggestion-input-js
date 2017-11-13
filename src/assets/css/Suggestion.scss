@@ -96,8 +96,12 @@ $listItemVerticalPadding: 10px;
     &:focus{
       background-color: rgba(222, 222, 222, 0.8); // darker
     }
-    &:active, &.active{
+    &:active, &.focused{
       background-color: rgba(222, 222, 222, 0.7); // darker
+    }
+    &.selected{
+      background-color: rgba(200, 200, 200, 0.9); // darker
+      font-weight: bold;
     }
   }
 
