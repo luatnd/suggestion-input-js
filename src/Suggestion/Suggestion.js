@@ -134,7 +134,6 @@ export default class Suggestion {
     this.suggestListNode = suggestListNode;
   
     this.listNode = document.createElement('ul');
-    this.listNode.setAttribute('tabindex', 1);
     this.suggestListNode.appendChild(this.listNode);
   }
   
@@ -236,8 +235,17 @@ export default class Suggestion {
   onListNodeClicked(event) {
     const clickedListItem = event.target.closest(`.${setting.suggestionList.className} > ul > li`);
     if (clickedListItem !== null) {
+      const isHistoryDeleteBtn = event.target.matches('.item-btn');
       
-      this.updateStateSelectedItemKey(clickedListItem.getAttribute('data-key'));
+      if (isHistoryDeleteBtn) {
+        
+        this.removeHistoryListItem(clickedListItem);
+        
+      } else {
+        
+        this.updateStateSelectedItemKey(clickedListItem.getAttribute('data-key'));
+        
+      }
       
     } else {
       this.logger.log('Error: Can not found the item?');
@@ -376,6 +384,28 @@ export default class Suggestion {
     }
   }
   
+  
+  /**
+   * Using as a setter + trigger UI change.
+   *
+   * Remove history item
+   */
+  removeHistoryListItem (listItemElement) {
+    const itemKey = listItemElement.getAttribute('data-key');
+    
+    // remove from history
+    this.localStore.removeHistoryItem(itemKey);
+    
+    // remove from dom
+    listItemElement.classList.add('remove'); // CSS transition
+    setTimeout(function () {
+      listItemElement.remove();
+    }, 300);
+    
+    // Dangerously remove from state but avoid the DOM change
+    delete this.stateSuggestItems[itemKey];
+  }
+  
   /**
    * Using as a setter + trigger UI change.
    *
@@ -401,29 +431,8 @@ export default class Suggestion {
   
     /**
      * ====  HISTORY ITEM APPEND =======
-     * The basic idea is check list items,
-     * if it's is history item then move it to the beginning of the list
      */
-    let historyItemKeys = this.localStore.getHistoryItemKeys();
-    const suitableHistoryItems = {};
-    let newItems = Object.assign({}, items);
-    
-    for (let key in historyItemKeys) {
-      if (historyItemKeys.hasOwnProperty(key)) {
-        
-        if (typeof items[key] !== 'undefined') {
-          const historyItem = items[key];
-          
-          suitableHistoryItems[key] = Object.assign({}, historyItem, {isHistory: true});
-          delete newItems[key];
-        }
-
-      }
-    }
-    newItems = Object.assign({}, suitableHistoryItems, newItems);
-    
-    //this.logger.log("suitableHistoryItems: ", suitableHistoryItems);
-    //this.logger.log("newItems: ", newItems);
+    const newItems = this.mergeListWithHistory(items);
     /**
      * ====  END: HISTORY ITEM APPEND =======
      */
@@ -495,6 +504,38 @@ export default class Suggestion {
         this.listNode.appendChild(iNode);
       }
     }
+  }
+  
+  /**
+   * The basic idea is check list items,
+   * if it's is history item then move it to the beginning of the list
+   *
+   * @param items
+   * @returns {{}} newItems with history at the beginning of the list
+   */
+  mergeListWithHistory(items) {
+    let historyItemKeys = this.localStore.getHistoryItemKeys();
+    const suitableHistoryItems = {};
+    let newItems = Object.assign({}, items);
+    
+    for (let key in historyItemKeys) {
+      if (historyItemKeys.hasOwnProperty(key)) {
+        
+        if (typeof items[key] !== 'undefined') {
+          const historyItem = items[key];
+          
+          suitableHistoryItems[key] = Object.assign({}, historyItem, {isHistory: true});
+          delete newItems[key];
+        }
+        
+      }
+    }
+    newItems = Object.assign({}, suitableHistoryItems, newItems);
+    
+    //this.logger.log("suitableHistoryItems: ", suitableHistoryItems);
+    //this.logger.log("newItems: ", newItems);
+    
+    return newItems;
   }
   
   static getId(id) {

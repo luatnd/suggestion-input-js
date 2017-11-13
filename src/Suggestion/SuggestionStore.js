@@ -143,4 +143,10 @@ export default class SuggestionStore {
     
     this.store.setData('history', newHistoryItems);
   }
+  
+  removeHistoryItem (itemKey) {
+    const historyItems = this.getHistoryItemKeys();
+    delete historyItems[itemKey];
+    this.store.setData('history', historyItems);
+  }
 }

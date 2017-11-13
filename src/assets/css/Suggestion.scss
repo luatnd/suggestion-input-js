@@ -73,6 +73,7 @@ $listItemVerticalPadding: 10px;
   & > ul > li {
     @include list-group-item;
 
+    overflow: hidden;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -88,8 +89,12 @@ $listItemVerticalPadding: 10px;
     cursor: pointer;
     padding: $listItemVerticalPadding/2 14px;
 
-    transition: background-color 0.2s;
+    height: $listItemH - $listItemVerticalPadding;
+    transition: background-color 0.2s, height 300ms;
     border-left: 3px solid transparent;
+
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
 
     &.his{
       background-color: #d2d2d2; // No glassy
@@ -107,6 +112,10 @@ $listItemVerticalPadding: 10px;
     &.selected{
       background-color: rgba(200, 200, 200, 0.9); // darker
       font-weight: bold;
+    }
+    &.remove {
+      padding: 0 14px;
+      height: 0;
     }
   }
 
