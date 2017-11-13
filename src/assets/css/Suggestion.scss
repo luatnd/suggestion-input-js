@@ -17,6 +17,7 @@ $commonShadow: 1px 2px 10px 0 rgba(0,0,0,0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    min-width: 0; // This support child ellipsis, see .item-title
   }
 
   .suggestion-input {
@@ -37,6 +38,7 @@ $commonShadow: 1px 2px 10px 0 rgba(0,0,0,0.1);
   .suggestion-list {
     display: none;
     position: absolute;
+    z-index: 9;
     left: 0;
     top: $inputHeight + $margin;
 
@@ -105,19 +107,26 @@ $listItemVerticalPadding: 10px;
     border-radius: 5px;
   }
   .item-title {
+    //https://css-tricks.com/flexbox-truncated-text/
     margin-left: 12px;
+
+    flex: 1 1 auto; // default: 0 1 auto | flex: flex-grow flex-shrink flex-basis
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .item-btn {
     @include btn;
 
-    padding: 0;
+    padding: 0 0 0 0;
     width: 26px;
     height: 26px;
-    background: url("./img/ei-trash.svg") 120% 120% no-repeat;
+    background: url(./img/ei-trash.svg) no-repeat;
     background-color: transparent;
-    background-size: 110% 110%;
-    background-position: 50% 50%;
-    border-radius: 20px;
+    //background-size: 110% 110%;
+    background-size: 26px 26px;
+    background-position: 100% 20%;
+    border-radius: 50px;
 
     &:hover{
       background-color: #e0e0e0;
