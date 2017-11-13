@@ -3,11 +3,12 @@ A pure JS plugin which transform input into a suggestion-able input.
 Support keyboard, mouse, history.
 
 # How to use
+### Quickstart
 TBW:
 `id`
 `data`
 
-# API
+### API
 TBR
 
 # Development

@@ -7,7 +7,7 @@
 import SuggestionLogger from './SuggestionLogger.js';
 import SuggestionStore from './SuggestionStore.js';
 import SuggestionInput from "./SuggestionInput.js";
-import { objectEqual, highlightKeywords, getPrevKey, getNextKey } from "../Helper.js";
+import SuggestionList from "./SuggestionList.js";
 
 // TODO: change all class name into BEM
 // TODO: change this to defaultSetting, and allow to pass the setting
@@ -23,36 +23,12 @@ const setting = {
   suggestionList: {
     className: "suggestion-list",
     activeClassName: "show",
-    history:{
+    history: {
       className: "suggestion-list-history"
     }
   },
 }
-const KEY = {
-  AT:              64,
-  BACKSPACE:       8,
-  DELETE:          46,
-  TAB:             9,
-  ESC:             27,
-  RETURN:          13,
-  LEFT:            37,
-  UP:              38,
-  RIGHT:           39,
-  DOWN:            40,
-  SPACE:           32,
-  HOME:            36,
-  END:             35,
-  COMMA:           188,
-  NUMPAD_ADD:      107,
-  NUMPAD_DECIMAL:  110,
-  NUMPAD_DIVIDE:   111,
-  NUMPAD_ENTER:    108,
-  NUMPAD_MULTIPLY: 106,
-  NUMPAD_SUBTRACT: 109,
-  PAGE_DOWN:       34,
-  PAGE_UP:         33,
-  PERIOD:          190,
-};
+
 export default class Suggestion {
   /**
    *
@@ -63,41 +39,41 @@ export default class Suggestion {
     this.id = id;
     this.setData(data);
     
+    this.containerNode = null;
+    
+    this.eventManager = {
+      docClick: null,
+    };
+    
+    this.logger = new SuggestionLogger(id, setting.debug);
+    this.localStore = new SuggestionStore(id, setting);
+    this.stateActive = false; // The dropDown is showing (input can focus or not)
+    
     this.input = new SuggestionInput(id, setting, {
       doSearch: this.doSearch.bind(this),
       updateActiveState: this.updateActiveState.bind(this),
     });
     
-    this.containerNode = null;
-    this.suggestListNode = null;
-    this.listNode = null; // Migrate to another class
-    
-    this.eventManager = {
-      docClick: null,
-      listClick: null,
-      docKeyDown: null,
-    };
-    
-    this.logger = new SuggestionLogger(id, setting.debug);
-    this.localStore = new SuggestionStore(id, setting);
-    this.inputTimer = null;
-    
-    this.stateActive = false; // The dropDown is showing (input can focus or not)
-    this.stateSuggestItems = {}; // List of item in suggest box
-    //this.stateHistoryItems = {}; // List of item in history box
-    this.stateFocusedItemKey = null; // The Focused (up/down key position) item `key` in this.data (get `key` by this.getId(item.id))
-    this.stateSelectedItemKey = null; // The selected item `key` in this.data (get `key` by this.getId(item.id))
+    this.dropdown = new SuggestionList(id, setting, {
+      localStore: this.localStore,
+      getStateActive: this.getStateActive.bind(this),
+      getDataItemByKey: this.getDataItemByKey.bind(this),
+      getKeyword: this.input.getKeyword.bind(this.input),
+      setKeyword: this.input.setKeyword.bind(this.input),
+      getInputDomEle: this.input.getDomEle.bind(this.input),
+    });
     
     this.initUI();
-    this.updateStateSuggestItems(this.getData()); // Initial suggestion list
+    this.dropdown.updateStateSuggestItems(this.getData()); // Initial suggestion list
     this.startListener();
     this.initDatabase();
   }
   
   destruct() {
     this.input.destruct();
+    this.dropdown.destruct();
     this.containerNode.outerHTML = this.input.getDomEle().outerHTML;
-
+    
     this.stopListener();
     // Remain the database
   }
@@ -135,10 +111,10 @@ export default class Suggestion {
     const suggestListNode = document.createElement('div');
     suggestListNode.classList.add(setting.suggestionList.className);
     containerNode.appendChild(suggestListNode);
-    this.suggestListNode = suggestListNode;
-  
-    this.listNode = document.createElement('ul');
-    this.suggestListNode.appendChild(this.listNode);
+    this.dropdown.setSuggestListNode(suggestListNode);
+    
+    this.dropdown.setListNodeEle(document.createElement('ul'));
+    this.dropdown.getSuggestListNode().appendChild(this.dropdown.getListNodeEle());
   }
   
   startListener() {
@@ -148,26 +124,16 @@ export default class Suggestion {
      * Detect and handle click outside of suggestion container
      */
     document.addEventListener('click', this.eventManager.docClick = this.onDocumentClicked.bind(this));
-  
-    /**
-     * Detect click an list item
-     */
-    this.listNode.addEventListener('click', this.eventManager.listClick = this.onListNodeClicked.bind(this));
-  
-    /**
-     * Handle keyboard selection
-     */
-    document.addEventListener('keydown', this.eventManager.docKeyDown = this.onDocKeyDown.bind(this));
+    
+    this.dropdown.startListener();
   }
   
   stopListener() {
     this.input.stopListener();
-    
     document.removeEventListener('click', this.eventManager.docClick);
-    this.listNode.removeEventListener('click', this.eventManager.listClick);
-    document.removeEventListener('keydown', this.eventManager.docKeyDown);
+    this.dropdown.stopListener();
   }
-
+  
   /**
    * Can use Element.closest() but its very experimental, not safe
    * Can use Element.closest() polyfill with Element.matches(), but matches() is non-standard itself
@@ -182,73 +148,6 @@ export default class Suggestion {
     if (!isClickedInside) {
       this.updateActiveState(false);
     }
-  }
-  
-  onDocKeyDown(event) {
-    // Do not care about some instances else
-    if (this.stateActive) {
-      switch (event.keyCode) {
-        case KEY.DOWN:
-          this.onDownKey();
-          break;
-        case KEY.UP:
-          this.onUpKey();
-          break;
-        case KEY.RETURN:
-          event.preventDefault();
-          this.onEnterKey();
-          break;
-      }
-    }
-  }
-  
-  onUpKey() {
-    const nextItemKey = getPrevKey(this.stateSuggestItems, this.stateFocusedItemKey);
-    this.updateStateFocusedItemKey(nextItemKey);
-  }
-  
-  onDownKey() {
-    const prevItemKey = getNextKey(this.stateSuggestItems, this.stateFocusedItemKey);
-    this.updateStateFocusedItemKey(prevItemKey);
-  }
-  
-  onEnterKey() {
-    // Enter then choose focused item is selected
-    const selectedItemKey = this.stateFocusedItemKey;
-    
-    this.updateStateSelectedItemKey(selectedItemKey);
-  }
-  
-  onListNodeClicked(event) {
-    const clickedListItem = event.target.closest(`.${setting.suggestionList.className} > ul > li`);
-    if (clickedListItem !== null) {
-      const isHistoryDeleteBtn = event.target.matches('.item-btn');
-      
-      if (isHistoryDeleteBtn) {
-        
-        this.removeHistoryListItem(clickedListItem);
-        
-      } else {
-        
-        this.updateStateSelectedItemKey(clickedListItem.getAttribute('data-key'));
-        
-      }
-      
-    } else {
-      this.logger.log('Error: Can not found the item?');
-    }
-  }
-  
-  initDatabase() {
-    //this.logger.log("TODO: initDatabase");
-  }
-
-  showSuggestion() {
-    this.suggestListNode.classList.add(setting.suggestionList.activeClassName);
-  }
-  
-  hideSuggestion() {
-    this.suggestListNode.classList.remove(setting.suggestionList.activeClassName);
   }
   
   /**
@@ -267,6 +166,7 @@ export default class Suggestion {
   getData() {
     return this.data;
   }
+  
   setData(data) {
     this.data = {};
     if (Array.isArray(data)) {
@@ -275,13 +175,18 @@ export default class Suggestion {
       }
     }
   }
+  
   getDataItem(itemOriginalId) {
     return this.getDataItemByKey(Suggestion.getId(itemOriginalId));
   }
+  
   getDataItemByKey(itemKey) {
     return (typeof this.data[itemKey] !== 'undefined') ? this.data[itemKey] : null;
   }
   
+  getStateActive() {
+    return this.stateActive;
+  }
   
   /**
    * Using as a setter + trigger UI change.
@@ -292,237 +197,10 @@ export default class Suggestion {
     this.stateActive = state;
     
     if (this.stateActive) {
-      this.showSuggestion();
+      this.dropdown.showSuggestion();
     } else {
-      this.hideSuggestion();
+      this.dropdown.hideSuggestion();
     }
-  }
-  
-  /**
-   * Using as a setter + trigger UI change.
-   * @param {string} itemKey
-   */
-  updateStateSelectedItemKey(itemKey) {
-    if (itemKey === this.stateSelectedItemKey) {
-      return;
-    }
-    
-    // Remove active from old node
-    if (this.stateSelectedItemKey !== null) {
-      const prevActiveNode = this.listNode.querySelector(`[data-key="${this.stateSelectedItemKey}"]`);
-      if (prevActiveNode) {
-        // prevActiveNode can be null because the current filtered list can not ensure contain old select item
-        prevActiveNode.classList.remove('selected');
-      }
-    }
-    
-    // Add active to new node
-    const activeNode = this.listNode.querySelector(`[data-key="${itemKey}"]`);
-    if (activeNode) {
-      activeNode.classList.add('selected');
-    }
-    
-    // Update state
-    this.stateSelectedItemKey = itemKey;
-  
-    // Trigger UI change to input
-    const item = this.getDataItemByKey(itemKey);
-    this.input.setKeyword(item.name);
-  
-    this.updateStateFocusedItemKey(itemKey);
-    
-
-    // Save history to DB:
-    this.localStore.addHistoryItem(itemKey);
-  }
-  
-  /**
-   * Using as a setter + trigger UI change.
-   * @param {string} focusedItemKey
-   */
-  updateStateFocusedItemKey(focusedItemKey) {
-    if (focusedItemKey === this.stateFocusedItemKey) {
-      return;
-    }
-    
-    // Remove active from old node
-    if (this.stateFocusedItemKey !== null) {
-      const prevActiveNode = this.listNode.querySelector(`[data-key="${this.stateFocusedItemKey}"]`);
-      if (prevActiveNode) {
-        // prevActiveNode can be null because the current filtered list can not ensure contain old select item
-        prevActiveNode.classList.remove('focused');
-      }
-    }
-  
-    // Add active to new node
-    const activeNode = this.listNode.querySelector(`[data-key="${focusedItemKey}"]`);
-    if (activeNode) {
-      activeNode.classList.add('focused');
-    }
-  
-    // Update state
-    this.stateFocusedItemKey = focusedItemKey;
-    
-    // Scroll into view only if input was focused
-    if (this.input.getDomEle() === document.activeElement) {
-      if (typeof activeNode.scrollIntoView !== 'undefined') {
-        activeNode.scrollIntoView()
-      }
-    }
-  }
-  
-  
-  /**
-   * Using as a setter + trigger UI change.
-   *
-   * Remove history item
-   */
-  removeHistoryListItem (listItemElement) {
-    const itemKey = listItemElement.getAttribute('data-key');
-    
-    // remove from history
-    this.localStore.removeHistoryItem(itemKey);
-    
-    // remove from dom
-    listItemElement.classList.add('remove'); // CSS transition
-    setTimeout(function () {
-      listItemElement.remove();
-    }, 300);
-    
-    // Dangerously remove from state but avoid the DOM change
-    delete this.stateSuggestItems[itemKey];
-  }
-  
-  /**
-   * Using as a setter + trigger UI change.
-   *
-   * Do update suggestion list and change the DOM
-   * Only do update when items list was different to old items
-   *
-   * Some part of this.data
-   *
-   * Current update method:
-   *    Clear all child of DOM node listNode
-   *    Append new child for listNode
-   *
-   * @param items
-   */
-  updateStateSuggestItems(items) {
-    // Need update or not
-    if (objectEqual(this.stateSuggestItems, items)) {
-      this.logger.log('new items same as old items --> No update');
-      
-      return;
-    }
-  
-  
-    /**
-     * ====  HISTORY ITEM APPEND =======
-     */
-    const newItems = this.mergeListWithHistory(items);
-    /**
-     * ====  END: HISTORY ITEM APPEND =======
-     */
-    
-    
-    this.stateSuggestItems = newItems;
-    
-    
-    if (this.listNode === null) {
-      this.logger.log('ERROR: listNode is null');
-      return;
-    }
-    
-    this.listNode.innerHTML = null;
-    
-    for (let key in newItems) {
-      if (newItems.hasOwnProperty(key)) {
-        const item = newItems[key];
-        
-        /*
-        <li>
-            <div class="flex">
-                <img class="item-img" alt="alt" src="http://is4.mzstatic.com/image/thumb/Purple128/v4/32/7e/ce/327ece67-3ebe-a39b-fb34-71ca3d917823/AppIcon-1x_U007emarketing-85-220-7.png/200x200bb.png">
-                <span class="item-title">Tool glasses</span>
-            </div>
-            <div class="item-btn"></div>
-        </li>
-        
-        TODO: Allow configure className of these elements
-         */
-        const iNode = document.createElement('li');
-        iNode.setAttribute('data-key', key);
-  
-        const iDiv = document.createElement('div');
-        iDiv.classList.add('flex');
-        
-        const iIcon = document.createElement('img');
-        iIcon.classList.add('item-img');
-        iIcon.setAttribute('alt', item.name);
-        iIcon.setAttribute('src', item.icon);
-        
-        const iName = document.createElement('span');
-        iName.classList.add('item-title');
-        iName.innerHTML = highlightKeywords(item.name, this.input.getKeyword());
-        
-        iDiv.appendChild(iIcon);
-        iDiv.appendChild(iName);
-        iNode.appendChild(iDiv);
-  
-  
-  
-        /**
-         * Handle History item UI
-         */
-        if (item.isHistory) {
-          iNode.classList.add('his');
-          
-          const iBtn = document.createElement('div');
-          iBtn.classList.add('item-btn');
-          
-          iNode.appendChild(iBtn);
-        }
-        /**
-         * END Handle History item UI
-         */
-        
-        
-        // Append to list
-        this.listNode.appendChild(iNode);
-      }
-    }
-  }
-  
-  /**
-   * The basic idea is check list items,
-   * if it's is history item then move it to the beginning of the list
-   *
-   * @param items
-   * @returns {{}} newItems with history at the beginning of the list
-   */
-  mergeListWithHistory(items) {
-    let historyItemKeys = this.localStore.getHistoryItemKeys();
-    const suitableHistoryItems = {};
-    let newItems = Object.assign({}, items);
-    
-    for (let key in historyItemKeys) {
-      if (historyItemKeys.hasOwnProperty(key)) {
-        
-        if (typeof items[key] !== 'undefined') {
-          const historyItem = items[key];
-          
-          suitableHistoryItems[key] = Object.assign({}, historyItem, {isHistory: true});
-          delete newItems[key];
-        }
-        
-      }
-    }
-    newItems = Object.assign({}, suitableHistoryItems, newItems);
-    
-    //this.logger.log("suitableHistoryItems: ", suitableHistoryItems);
-    //this.logger.log("newItems: ", newItems);
-    
-    return newItems;
   }
   
   static getId(id) {
@@ -530,36 +208,8 @@ export default class Suggestion {
   }
   
   doSearch(keyword) {
-
-    const matchedItems = search(this.getData(), keyword);
-    this.updateStateSuggestItems(matchedItems);
-    
-    /**
-     * TODO: Move to Suggestion input class for easier testing
-     */
-    function search(items, keywords) {
-      let newItems = {};
-      
-      for (let prop in items) {
-        if (items.hasOwnProperty(prop)) {
-          const app = items[prop];
-  
-          let matched = false;
-          const words = keywords.trim().toLowerCase().split(' ');
-          const title = app.name.toLowerCase()
-  
-          for (let i = 0, l = words.length; i < l; i++) {
-            matched = matched || (title.indexOf(words[i]) >= 0);
-          }
-  
-          if (matched) {
-            newItems[prop] = app;
-          }
-        }
-      }
-      
-      return newItems;
-    }
+    const matchedItems = SuggestionList.search(this.getData(), keyword);
+    this.dropdown.updateStateSuggestItems(matchedItems);
   }
   
 }

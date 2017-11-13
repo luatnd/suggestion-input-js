@@ -13,7 +13,8 @@ export default class SuggestionInput {
       inputFocus: null,
       inputBlur: null,
     };
-    
+  
+    this.inputTimer = null;
     //this.startListener(); // Can not start listener this time,
   }
   
