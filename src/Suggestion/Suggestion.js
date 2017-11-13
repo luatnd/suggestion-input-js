@@ -24,9 +24,14 @@ const setting = {
   },
 }
 export default class Suggestion {
+  /**
+   *
+   * @param {string} id
+   * @param {[]} data
+   */
   constructor(id, data) {
     this.id = id;
-    this.data = data;
+    this.setData(data);
     
     this.inputEle = document.querySelector(`[data-sg-id="${id}"]`);
     this.containerNode = null;
@@ -42,10 +47,14 @@ export default class Suggestion {
     };
     
     this.logger = new Logger(id, setting.debug);
+    this.inputTimer = null;
     
+    this.stateActive = false; // The dropDown is showing (input can focus or not)
+    this.stateSuggestItems = {};
+    this.stateHistoryItems = {};
     
     this.initUI();
-    this.updateSuggestionList(this.getData()); // Initial suggestion list
+    this.updateStateSuggestItems(this.getData()); // Initial suggestion list
     this.startListener();
     this.initDatabase();
   }
@@ -120,16 +129,18 @@ export default class Suggestion {
   }
   
   onInputEleInput () {
-    let myTimer;
     const keyword = this.getKeyword();
-    
-    clearTimeout(myTimer);
-    myTimer = setTimeout(() => {
-      this.suggestListNode.innerHTML = keyword;
+
+    clearTimeout(this.inputTimer);
+    this.inputTimer = setTimeout(() => {
+      
+      this.doSearch(keyword);
+      
     }, setting.suggestionInput.searchDelay);
   }
+  
   onInputEleFocus() {
-    this.showSuggestion();
+    this.updateActiveState(true);
   }
   
   /**
@@ -144,14 +155,14 @@ export default class Suggestion {
   onDocumentClicked(event) {
     const isClickedInside = this.containerNode.contains(event.target);
     if (!isClickedInside) {
-      this.hideSuggestion();
+      this.updateActiveState(false);
     }
   }
   
   onListNodeClicked(event) {
     const clickedListItem = event.target.closest(`.${setting.suggestionList.className} > ul > li`);
     if (clickedListItem !== null) {
-      const item = this.getDataItem(clickedListItem.getAttribute('data-id'));
+      const item = this.getDataItemByKey(clickedListItem.getAttribute('data-id'));
       this.updateInputVal(item.name);
     } else {
       this.logger.log('Error: Can not found the item?');
@@ -162,6 +173,21 @@ export default class Suggestion {
     this.logger.log("TODO: initDatabase");
   }
   
+  /**
+   * Using as a setter for stateActive
+   *
+   * @param {boolean} state
+   */
+  updateActiveState(state) {
+    this.stateActive = state;
+    
+    if (this.stateActive) {
+      this.showSuggestion();
+    } else {
+      this.hideSuggestion();
+    }
+  }
+
   showSuggestion() {
     this.suggestListNode.classList.add(setting.suggestionList.activeClassName);
   }
@@ -185,13 +211,24 @@ export default class Suggestion {
     return this.data;
   }
   setData(data) {
-    this.data = data;
+    this.data = {};
+    if (Array.isArray(data)) {
+      for (let item of data) {
+        this.data[Suggestion.getId(item.id)] = item;
+      }
+    }
   }
-  getDataItem(itemKey) {
+  getDataItem(itemOriginalId) {
+    return this.getDataItemByKey(Suggestion.getId(itemOriginalId));
+  }
+  getDataItemByKey(itemKey) {
     return (typeof this.data[itemKey] !== 'undefined') ? this.data[itemKey] : null;
   }
   
   /**
+   * Do update suggestion list and change the DOM
+   * Only do update when items list was different to old items
+   *
    * Some part of this.data
    *
    * Current update method:
@@ -200,7 +237,16 @@ export default class Suggestion {
    *
    * @param items
    */
-  updateSuggestionList(items) {
+  updateStateSuggestItems(items) {
+    // Need update or not
+    if (Suggestion.objectEqual(this.stateSuggestItems, items)) {
+      this.logger.log('new items same as old items --> No update');
+      
+      return;
+    }
+    
+    this.stateSuggestItems = items;
+    
     if (this.listNode === null) {
       this.logger.log('ERROR: listNode is null');
       return;
@@ -210,7 +256,7 @@ export default class Suggestion {
     
     for (let key in items) {
       if (items.hasOwnProperty(key)) {
-        const app = items[key];
+        const item = items[key];
         
         /*
         <li>
@@ -224,7 +270,7 @@ export default class Suggestion {
         TODO: Allow configure className of these elements
          */
         const iNode = document.createElement('li');
-        iNode.setAttribute('data-id', app.id);
+        iNode.setAttribute('data-id', key);
   
         const iDiv = document.createElement('div');
         iDiv.classList.add('flex');
@@ -234,12 +280,12 @@ export default class Suggestion {
         
         const iIcon = document.createElement('img');
         iIcon.classList.add('item-img');
-        iIcon.setAttribute('alt', app.name);
-        iIcon.setAttribute('src', app.icon);
+        iIcon.setAttribute('alt', item.name);
+        iIcon.setAttribute('src', item.icon);
         
         const iName = document.createElement('span');
         iName.classList.add('item-title');
-        iName.innerText = app.name;
+        iName.innerHTML = Suggestion.highlightKeywords(item.name, this.getKeyword());
         
         iDiv.appendChild(iIcon);
         iDiv.appendChild(iName);
@@ -253,6 +299,42 @@ export default class Suggestion {
     }
   }
   
+  static getId(id) {
+    return 'I' + id;
+  }
+  
+  // TODO: Move all static fn to prototype or another helper class
+  static highlightKeywords(str, keywords) {
+    function regexEscape(str) {
+      return str.replace(/[[{}()*+?^$|\]\.\\]/g, "\\$&")
+    }
+    
+    const words = keywords.trim().split(' ').map(w => regexEscape(w));
+    const safeRegEx = words.join('|');
+    const containSomeOf = new RegExp(`(${safeRegEx})`, "gi");
+    
+    return str.replace(containSomeOf, '<span>$1</span>');
+  }
+  static objectEqual(obj1, obj2) {
+    let eq = true;
+    
+    const o1Keys = Object.keys(obj1);
+    const o2Keys = Object.keys(obj2);
+  
+    if (o1Keys.length !== o2Keys.length) {
+      eq = false;
+    } else {
+      for (let key of o1Keys) {
+        if (typeof obj2[key] === 'undefined') {
+          eq = false;
+          break;
+        }
+      }
+    }
+    
+    return eq;
+  }
+  
   updateInputVal (val) {
     this.inputEle.value = val;
   }
@@ -261,8 +343,39 @@ export default class Suggestion {
   
   }
   
-  doSearch() {
   
+  doSearch(keyword) {
+    this.logger.log('Show suggestion for ' + keyword);
+  
+    const matchedItems = search(this.getData(), keyword);
+    this.updateStateSuggestItems(matchedItems);
+    
+    /**
+     * TODO: Move to Suggestion input class for easier testing
+     */
+    function search(items, keywords) {
+      let newItems = {};
+      
+      for (let prop in items) {
+        if (items.hasOwnProperty(prop)) {
+          const app = items[prop];
+  
+          let matched = false;
+          const words = keywords.trim().toLowerCase().split(' ');
+          const title = app.name.toLowerCase()
+  
+          for (let i = 0, l = words.length; i < l; i++) {
+            matched = matched || (title.indexOf(words[i]) >= 0);
+          }
+  
+          if (matched) {
+            newItems[prop] = app;
+          }
+        }
+      }
+      
+      return newItems;
+    }
   }
   
   getKeyword() {

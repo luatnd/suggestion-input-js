@@ -26,19 +26,25 @@ const sgInstanceAppstoreTopPaid2 = new Suggestion('sg-appstore-top-paid2', topPa
  * See more at README.md
  *
  * @param rawData
- * @returns {{}}
+ * @returns {[]}
  */
 function convertDataAppStoreRSS(rawData) {
-  const results = rawData.feed.results;
-  const data = {};
-  
-  for (let v of results) {
-    data[v.id] = {
-      id: v.id.toString(),
-      icon: v.artworkUrl100,
-      name: v.name,
+  const results = rawData.feed.results.sort((a, b) => {
+    const nameA = a.name.toUpperCase();
+    const nameB = b.name.toUpperCase();
+    if (nameA < nameB) {
+      return -1;
     }
-  }
+    if (nameA > nameB) {
+      return 1;
+    }
+    
+    return 0;
+  });
   
-  return data;
+  return results.map(v => ({
+    id: v.id.toString(),
+    icon: v.artworkUrl100,
+    name: v.name,
+  }));
 }

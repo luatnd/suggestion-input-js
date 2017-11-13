@@ -52,10 +52,12 @@ This plugin use (~~strikethrough~~ mean this compatible was not investigated):
 
 * Class
 * let/const
-* ~~spread operator {…}~~
+* ~~spread operator {…} --> Not safe for all browser so we use Object.assign instead~~
 * arrow fn
 * ~~Promise~~
 * Async await
+* ~~matches (closest polyfill)~~
+* ~~Object assign with polyfill() ~~
 
 ### Supported browser
 ##### Desktop
@@ -65,17 +67,19 @@ This plugin use (~~strikethrough~~ mean this compatible was not investigated):
 | Class         |49	     | 13	| 45	  | No | 43		|  9     |
 | Const/let		|21		 | Yes	| 36	  | 11 | Yes	|  5.1	 |
 | Arrow fn		|45		 | Yes	| 22	  | No | 32		|  10	 |
+| Obj.assign()	|45		 | Yes	| 34	  | No | 32		|  9	 |
 |---------------|---     |---   |---      |--- |---     |---     |
 | ALL(max)      |55	     | 13	| 52	  | No | 43		|  10.1  |
 
 ##### Mobile
-| Feature       | Android webview | Chrome for Android |  Edge mobile   |Firefox Android| IE    | iOS Safari | Opera Android |
+| Feature       | Android webview | Chrome for Android |  Edge mobile   |Firefox Android| IE    | Opera Android | iOS Safari |
 | ------------- |-------:         | ----:              |   -----:       | --:           | -----:| -----:     |---:           |
 | Async await   |Yes	          | 55	               |Yes             | 52            |No     | 42         |  10.1         |
 | Class         |?	              | Yes	               |13	            | 45			|No		| ?			 |  9			 |
 | const/let		|Yes              | Yes	               |Yes	            | 36			|11		| Yes		 |  Yes			 |
+| Obj.assign()	|No(has polyfil)  | 45	               |Yes	            | Yes			|No		| No		 |  Yes			 |
 |---------------|---|---|---|---|---|---|---|
-| ALL           |Yes (?)		  | 55	               |Yes             | 52            |No     | 42         |  10.1		 |
+| ALL           |Yes (? + polyf)  | 55	               |Yes             | 52            |No     | 42(polyfl) |  10.1		 |
 
 
 

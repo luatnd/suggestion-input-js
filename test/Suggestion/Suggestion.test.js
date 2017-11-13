@@ -24,29 +24,29 @@ test('Can Init data, list of app with appId is String', () => {
     </div>`
   ;
   
-  const data = {
-    1: {
+  const data = [
+    {
       id: "1",
       icon: 'http://img.com/icon_url',
       name: 'Google Chrome',
     },
-    2: {
+    {
       id: "2",
       icon: 'http://img.com/icon_url',
       name: 'Read Booker',
     },
-    3: {
+    {
       id: "3",
       icon: 'http://img.com/icon_url',
       name: 'Boom Game',
     },
-  }
+  ]
   
   const id = "sg-appstore-ios";
   const sgIntance = new Suggestion(id, data);
   
-  expect(sgIntance.getData()['1'].id).toBe('1');
-  expect(sgIntance.getData()['1'].name).toBe('Google Chrome');
+  expect(sgIntance.getDataItem('1').id).toBe('1');
+  expect(sgIntance.getDataItem('1').name).toBe('Google Chrome');
 });
 
 test('Can init inputEle', () => {

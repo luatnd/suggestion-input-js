@@ -114,6 +114,10 @@ $listItemVerticalPadding: 10px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    & > span {
+      background: yellow;
+    }
   }
   .item-btn {
     @include btn;
