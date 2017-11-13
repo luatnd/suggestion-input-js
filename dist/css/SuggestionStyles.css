@@ -74,7 +74,8 @@ input:not([type=range]), label, select, summary, textarea {
     -ms-flex-pack: justify;
         justify-content: space-between;
     -ms-flex-align: center;
-        align-items: center; }
+        align-items: center;
+    min-width: 0; }
   .suggestion-container .suggestion-input {
     display: block;
     width: 100%;
@@ -107,6 +108,7 @@ input:not([type=range]), label, select, summary, textarea {
   .suggestion-container .suggestion-list {
     display: none;
     position: absolute;
+    z-index: 9;
     left: 0;
     top: 50px;
     width: 100%;
@@ -137,6 +139,7 @@ input:not([type=range]), label, select, summary, textarea {
   margin-bottom: -1px;
   background-color: #fff;
   border: 1px solid rgba(0, 0, 0, 0.125);
+  overflow: hidden;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: justify;
@@ -153,15 +156,29 @@ input:not([type=range]), label, select, summary, textarea {
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
   cursor: pointer;
   padding: 5px 14px;
-  -webkit-transition: background-color 0.2s;
-  -o-transition: background-color 0.2s;
-  transition: background-color 0.2s; }
+  height: 28px;
+  -webkit-transition: background-color 0.2s, height 300ms;
+  -o-transition: background-color 0.2s, height 300ms;
+  transition: background-color 0.2s, height 300ms;
+  border-left: 3px solid transparent;
+  -webkit-transform: translateZ(0);
+          transform: translateZ(0);
+  -webkit-backface-visibility: hidden; }
+  .suggestion-list > ul > li.his {
+    background-color: #d2d2d2; }
   .suggestion-list > ul > li:hover {
     background-color: rgba(222, 222, 222, 0.9); }
   .suggestion-list > ul > li:focus {
     background-color: rgba(222, 222, 222, 0.8); }
-  .suggestion-list > ul > li:active {
-    background-color: rgba(222, 222, 222, 0.7); }
+  .suggestion-list > ul > li:active, .suggestion-list > ul > li.focused {
+    background-color: rgba(200, 200, 200, 0.7);
+    border-left: 3px solid #16a2b7; }
+  .suggestion-list > ul > li.selected {
+    background-color: rgba(200, 200, 200, 0.9);
+    font-weight: bold; }
+  .suggestion-list > ul > li.remove {
+    padding: 0 14px;
+    height: 0; }
 
 .suggestion-list .item-img {
   height: 28px;
@@ -169,7 +186,15 @@ input:not([type=range]), label, select, summary, textarea {
   border-radius: 5px; }
 
 .suggestion-list .item-title {
-  margin-left: 12px; }
+  margin-left: 12px;
+  -ms-flex: 1 1 auto;
+      flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  -o-text-overflow: ellipsis;
+     text-overflow: ellipsis; }
+  .suggestion-list .item-title > span {
+    background: yellow; }
 
 .suggestion-list .item-btn {
   display: inline-block;
@@ -191,14 +216,14 @@ input:not([type=range]), label, select, summary, textarea {
   -o-transition: background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
   transition: background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
   transition: background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
-  padding: 0;
+  padding: 0 0 0 0;
   width: 26px;
   height: 26px;
-  background: url("./img/ei-trash.svg") 120% 120% no-repeat;
+  background: url(./img/ei-trash.svg) no-repeat;
   background-color: transparent;
-  background-size: 110% 110%;
-  background-position: 50% 50%;
-  border-radius: 20px; }
+  background-size: 26px 26px;
+  background-position: 100% 20%;
+  border-radius: 50px; }
   .suggestion-list .item-btn:active {
     color: #fff;
     background-color: #117a8b;

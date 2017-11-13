@@ -9,8 +9,7 @@ import SuggestionStore from './SuggestionStore.js';
 import SuggestionInput from "./SuggestionInput.js";
 import SuggestionList from "./SuggestionList.js";
 
-// TODO: change all class name into BEM
-// TODO: change this to defaultSetting, and allow to pass the setting
+
 const setting = {
   debug: true,
   container: {
@@ -34,10 +33,18 @@ export default class Suggestion {
    *
    * @param {string} id
    * @param {[]} data
+   * @param {{}} option {
+   *  debug: boolean,
+   *  searchDelay: int,
+   * }
    */
-  constructor(id, data) {
+  constructor(id, data, option = {
+    debug: false,
+    searchDelay: 200,
+  }) {
     this.id = id;
     this.setData(data);
+    this.setting = this.mapPublicOption(option);
     
     this.containerNode = null;
     
@@ -45,16 +52,16 @@ export default class Suggestion {
       docClick: null,
     };
     
-    this.logger = new SuggestionLogger(id, setting.debug);
-    this.localStore = new SuggestionStore(id, setting);
+    this.logger = new SuggestionLogger(id, this.setting.debug);
+    this.localStore = new SuggestionStore(id, this.setting);
     this.stateActive = false; // The dropDown is showing (input can focus or not)
     
-    this.input = new SuggestionInput(id, setting, {
+    this.input = new SuggestionInput(id, this.setting, {
       doSearch: this.doSearch.bind(this),
       updateActiveState: this.updateActiveState.bind(this),
     });
     
-    this.dropdown = new SuggestionList(id, setting, {
+    this.dropdown = new SuggestionList(id, this.setting, {
       localStore: this.localStore,
       getStateActive: this.getStateActive.bind(this),
       getDataItemByKey: this.getDataItemByKey.bind(this),
@@ -78,6 +85,21 @@ export default class Suggestion {
     // Remain the database
   }
   
+  mapPublicOption(option) {
+    const newSetting = Object.assign({}, setting);
+    
+    if (typeof option !== 'undefined') {
+      if (typeof option.debug !== 'undefined') {
+        newSetting.debug = option.debug;
+      }
+      if (typeof option.searchDelay !== 'undefined') {
+        newSetting.suggestionInput = Object.assign({}, newSetting.suggestionInput, {searchDelay: option.searchDelay});
+      }
+    }
+    
+    return newSetting;
+  }
+  
   /**
    * Transform input element UI into a suggestion input UI
    *    Container
@@ -93,14 +115,14 @@ export default class Suggestion {
    */
   initUI() {
     const newInputEle = this.input.getDomEle().cloneNode(true);
-    newInputEle.classList.add(setting.suggestionInput.className);
+    newInputEle.classList.add(this.setting.suggestionInput.className);
     
     /**
      * Plugin container Dom node
      * @type {Element}
      */
     const containerNode = document.createElement('div');
-    containerNode.classList.add(setting.container.className);
+    containerNode.classList.add(this.setting.container.className);
     this.input.getDomEle().replaceWith(containerNode);
     this.containerNode = containerNode;
     
@@ -109,7 +131,7 @@ export default class Suggestion {
     
     
     const suggestListNode = document.createElement('div');
-    suggestListNode.classList.add(setting.suggestionList.className);
+    suggestListNode.classList.add(this.setting.suggestionList.className);
     containerNode.appendChild(suggestListNode);
     this.dropdown.setSuggestListNode(suggestListNode);
     

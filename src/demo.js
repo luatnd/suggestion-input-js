@@ -17,8 +17,8 @@ const topFreeSuggestionData = convertDataAppStoreRSS(topFreeData);
 const topPaidSuggestionData = convertDataAppStoreRSS(topPaidData);
 
 const sgInstanceAppstoreTopFree1 = new Suggestion('sg-appstore-top-free1', topFreeSuggestionData);
-const sgInstanceAppstoreTopPaid1 = new Suggestion('sg-appstore-top-paid1', topPaidSuggestionData);
-const sgInstanceAppstoreTopPaid2 = new Suggestion('sg-appstore-top-paid2', topPaidSuggestionData);
+const sgInstanceAppstoreTopPaid1 = new Suggestion('sg-appstore-top-paid1', topPaidSuggestionData, {searchDelay: 0});
+const sgInstanceAppstoreTopPaid2 = new Suggestion('sg-appstore-top-paid2', topPaidSuggestionData, {debug: false, searchDelay: 1000});
 
 
 /**
