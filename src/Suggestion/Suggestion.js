@@ -6,6 +6,7 @@
 
 import SuggestionLogger from './SuggestionLogger.js';
 import SuggestionStore from './SuggestionStore.js';
+import SuggestionInput from "./SuggestionInput.js";
 
 // TODO: change all class name into BEM
 // TODO: change this to defaultSetting, and allow to pass the setting
@@ -61,15 +62,16 @@ export default class Suggestion {
     this.id = id;
     this.setData(data);
     
-    this.inputEle = document.querySelector(`[data-sg-id="${id}"]`);
+    this.input = new SuggestionInput(id, setting, {
+      doSearch: this.doSearch.bind(this),
+      updateActiveState: this.updateActiveState.bind(this),
+    });
+    
     this.containerNode = null;
     this.suggestListNode = null;
     this.listNode = null; // Migrate to another class
     
     this.eventManager = {
-      inputInput: null,
-      inputFocus: null,
-      inputBlur: null,
       docClick: null,
       listClick: null,
       docKeyDown: null,
@@ -92,8 +94,9 @@ export default class Suggestion {
   }
   
   destruct() {
-    this.inputEle.classList.remove(setting.suggestionInput.className);
-    this.containerNode.outerHTML = this.inputEle.outerHTML;
+    this.input.destruct();
+    this.containerNode.outerHTML = this.input.getDomEle().outerHTML;
+
     this.stopListener();
     // Remain the database
   }
@@ -112,8 +115,8 @@ export default class Suggestion {
    * 3. Done then enable the UI
    */
   initUI() {
-    const inputEle = this.inputEle.cloneNode(true);
-    inputEle.classList.add(setting.suggestionInput.className);
+    const newInputEle = this.input.getDomEle().cloneNode(true);
+    newInputEle.classList.add(setting.suggestionInput.className);
     
     /**
      * Plugin container Dom node
@@ -121,11 +124,11 @@ export default class Suggestion {
      */
     const containerNode = document.createElement('div');
     containerNode.classList.add(setting.container.className);
-    this.inputEle.replaceWith(containerNode);
+    this.input.getDomEle().replaceWith(containerNode);
     this.containerNode = containerNode;
     
-    this.inputEle = inputEle;
-    containerNode.appendChild(this.inputEle);
+    this.input.setDomEle(newInputEle);
+    containerNode.appendChild(this.input.getDomEle());
     
     
     const suggestListNode = document.createElement('div');
@@ -138,9 +141,7 @@ export default class Suggestion {
   }
   
   startListener() {
-    
-    this.inputEle.addEventListener("input", this.eventManager.inputInput = this.onInputEleInput.bind(this));
-    this.inputEle.addEventListener("focus", this.eventManager.inputFocus = this.onInputEleFocus.bind(this));
+    this.input.startListener();
     
     /**
      * Detect and handle click outside of suggestion container
@@ -159,28 +160,13 @@ export default class Suggestion {
   }
   
   stopListener() {
-    this.inputEle.removeEventListener("input", this.eventManager.inputInput);
-    this.inputEle.removeEventListener("focus", this.eventManager.inputFocus);
+    this.input.stopListener();
+    
     document.removeEventListener('click', this.eventManager.docClick);
     this.listNode.removeEventListener('click', this.eventManager.listClick);
     document.removeEventListener('keydown', this.eventManager.docKeyDown);
   }
-  
-  onInputEleInput () {
-    const keyword = this.getKeyword();
 
-    clearTimeout(this.inputTimer);
-    this.inputTimer = setTimeout(() => {
-      
-      this.doSearch(keyword);
-      
-    }, setting.suggestionInput.searchDelay);
-  }
-  
-  onInputEleFocus() {
-    this.updateActiveState(true);
-  }
-  
   /**
    * Can use Element.closest() but its very experimental, not safe
    * Can use Element.closest() polyfill with Element.matches(), but matches() is non-standard itself
@@ -340,7 +326,7 @@ export default class Suggestion {
   
     // Trigger UI change to input
     const item = this.getDataItemByKey(itemKey);
-    this.setKeyword(item.name);
+    this.input.setKeyword(item.name);
   
     this.updateStateFocusedItemKey(itemKey);
     
@@ -377,7 +363,7 @@ export default class Suggestion {
     this.stateFocusedItemKey = focusedItemKey;
     
     // Scroll into view only if input was focused
-    if (this.inputEle === document.activeElement) {
+    if (this.input.getDomEle() === document.activeElement) {
       if (typeof activeNode.scrollIntoView !== 'undefined') {
         activeNode.scrollIntoView()
       }
@@ -476,7 +462,7 @@ export default class Suggestion {
         
         const iName = document.createElement('span');
         iName.classList.add('item-title');
-        iName.innerHTML = Suggestion.highlightKeywords(item.name, this.getKeyword());
+        iName.innerHTML = Suggestion.highlightKeywords(item.name, this.input.getKeyword());
         
         iDiv.appendChild(iIcon);
         iDiv.appendChild(iName);
@@ -634,10 +620,4 @@ export default class Suggestion {
     }
   }
   
-  getKeyword() {
-    return this.inputEle.value;
-  }
-  setKeyword(keyword) {
-    this.inputEle.value = keyword;
-  }
 }
