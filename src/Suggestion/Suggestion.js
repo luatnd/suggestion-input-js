@@ -38,6 +38,7 @@ export default class Suggestion {
       inputFocus: null,
       inputBlur: null,
       docClick: null,
+      listClick: null,
     };
     
     this.logger = new Logger(id, setting.debug);
@@ -79,7 +80,7 @@ export default class Suggestion {
      */
     const containerNode = document.createElement('div');
     containerNode.classList.add(setting.container.className);
-    this.inputEle.replaceWith2(containerNode);
+    this.inputEle.replaceWith(containerNode);
     this.containerNode = containerNode;
     
     this.inputEle = inputEle;
@@ -104,12 +105,18 @@ export default class Suggestion {
      * Detect and handle click outside of suggestion container
      */
     document.addEventListener('click', this.eventManager.docClick = this.onDocumentClicked.bind(this));
+  
+    /**
+     * Detect click an list item
+     */
+    this.listNode.addEventListener('click', this.eventManager.listClick = this.onListNodeClicked.bind(this));
   }
   
   stopListener() {
     this.inputEle.removeEventListener("input", this.eventManager.inputInput);
     this.inputEle.removeEventListener("focus", this.eventManager.inputFocus);
-    document.addEventListener('click', this.eventManager.docClick);
+    document.removeEventListener('click', this.eventManager.docClick);
+    this.listNode.removeEventListener('click', this.eventManager.listClick);
   }
   
   onInputEleInput () {
@@ -141,6 +148,16 @@ export default class Suggestion {
     }
   }
   
+  onListNodeClicked(event) {
+    const clickedListItem = event.target.closest(`.${setting.suggestionList.className} > ul > li`);
+    if (clickedListItem !== null) {
+      const item = this.getDataItem(clickedListItem.getAttribute('data-id'));
+      this.updateInputVal(item.name);
+    } else {
+      this.logger.log('Error: Can not found the item?');
+    }
+  }
+  
   initDatabase() {
     this.logger.log("TODO: initDatabase");
   }
@@ -169,6 +186,9 @@ export default class Suggestion {
   }
   setData(data) {
     this.data = data;
+  }
+  getDataItem(itemKey) {
+    return (typeof this.data[itemKey] !== 'undefined') ? this.data[itemKey] : null;
   }
   
   /**
@@ -204,6 +224,7 @@ export default class Suggestion {
         TODO: Allow configure className of these elements
          */
         const iNode = document.createElement('li');
+        iNode.setAttribute('data-id', app.id);
   
         const iDiv = document.createElement('div');
         iDiv.classList.add('flex');
@@ -230,6 +251,10 @@ export default class Suggestion {
         this.listNode.appendChild(iNode);
       }
     }
+  }
+  
+  updateInputVal (val) {
+    this.inputEle.value = val;
   }
   
   updateHistoryList() {

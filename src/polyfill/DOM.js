@@ -3,6 +3,7 @@
  */
 export default function () {
   addReplaceWith();
+  closest_Polyfill();
 }
 
 function addReplaceWith(){
@@ -34,12 +35,22 @@ function addReplaceWith(){
     CharacterData.prototype.replaceWith = ReplaceWith;
   if (!DocumentType.prototype.replaceWith)
     DocumentType.prototype.replaceWith = ReplaceWith;
+}
+
+
+function closest_Polyfill() {
+  if (!Element.prototype.matches)
+    Element.prototype.matches = Element.prototype.msMatchesSelector ||
+      Element.prototype.webkitMatchesSelector;
   
-  
-  if (!Element.prototype.replaceWith2)
-    Element.prototype.replaceWith2 = ReplaceWith;
-  if (!CharacterData.prototype.replaceWith2)
-    CharacterData.prototype.replaceWith2 = ReplaceWith;
-  if (!DocumentType.prototype.replaceWith2)
-    DocumentType.prototype.replaceWith2 = ReplaceWith;
+  if (!Element.prototype.closest)
+    Element.prototype.closest = function(s) {
+      var el = this;
+      if (!document.documentElement.contains(el)) return null;
+      do {
+        if (el.matches(s)) return el;
+        el = el.parentElement;
+      } while (el !== null);
+      return null;
+    };
 }
