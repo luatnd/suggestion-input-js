@@ -66,7 +66,7 @@ export default class Suggestion {
     this.initUI();
     this.dropdown.updateStateSuggestItems(this.getData()); // Initial suggestion list
     this.startListener();
-    this.initDatabase();
+    //this.initDatabase();
   }
   
   destruct() {
