@@ -113,10 +113,34 @@ export default class SuggestionStore {
     return (typeof historyItems[itemKey] !== 'undefined');
   }
   
+  /**
+   * Add history item to the history store
+   * NOTE: Save max 25 history item
+   *
+   * @param itemKey
+   */
   addHistoryItem (itemKey) {
-    const historyItems = this.getHistoryItemKeys();
-    historyItems[itemKey] = itemKey;
+    if (this.isHistoryItemExist(itemKey)) {
+      return;
+    }
     
-    this.store.setData('history', historyItems);
+    const MAX_HISTORY_ITEM = 25;
+    
+    const historyItems = this.getHistoryItemKeys();
+    const newHistoryItems = {[itemKey]: itemKey};
+    let count = 0;
+    for (let prop in historyItems) {
+      if (count >= MAX_HISTORY_ITEM - 1) {
+        break;
+      } else {
+        count++;
+      }
+  
+      if (historyItems.hasOwnProperty(prop)) {
+        newHistoryItems[prop]  = historyItems[prop];
+      }
+    }
+    
+    this.store.setData('history', newHistoryItems);
   }
 }
