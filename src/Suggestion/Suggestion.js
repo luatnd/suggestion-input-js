@@ -7,6 +7,7 @@
 import SuggestionLogger from './SuggestionLogger.js';
 import SuggestionStore from './SuggestionStore.js';
 import SuggestionInput from "./SuggestionInput.js";
+import { objectEqual, highlightKeywords, getPrevKey, getNextKey } from "../Helper.js";
 
 // TODO: change all class name into BEM
 // TODO: change this to defaultSetting, and allow to pass the setting
@@ -202,12 +203,12 @@ export default class Suggestion {
   }
   
   onUpKey() {
-    const nextItemKey = Suggestion.getPrevKey(this.stateSuggestItems, this.stateFocusedItemKey);
+    const nextItemKey = getPrevKey(this.stateSuggestItems, this.stateFocusedItemKey);
     this.updateStateFocusedItemKey(nextItemKey);
   }
   
   onDownKey() {
-    const prevItemKey = Suggestion.getNextKey(this.stateSuggestItems, this.stateFocusedItemKey);
+    const prevItemKey = getNextKey(this.stateSuggestItems, this.stateFocusedItemKey);
     this.updateStateFocusedItemKey(prevItemKey);
   }
   
@@ -408,7 +409,7 @@ export default class Suggestion {
    */
   updateStateSuggestItems(items) {
     // Need update or not
-    if (Suggestion.objectEqual(this.stateSuggestItems, items)) {
+    if (objectEqual(this.stateSuggestItems, items)) {
       this.logger.log('new items same as old items --> No update');
       
       return;
@@ -462,7 +463,7 @@ export default class Suggestion {
         
         const iName = document.createElement('span');
         iName.classList.add('item-title');
-        iName.innerHTML = Suggestion.highlightKeywords(item.name, this.input.getKeyword());
+        iName.innerHTML = highlightKeywords(item.name, this.input.getKeyword());
         
         iDiv.appendChild(iIcon);
         iDiv.appendChild(iName);
@@ -527,65 +528,6 @@ export default class Suggestion {
   static getId(id) {
     return 'I' + id;
   }
-  
-  // TODO: Move all static fn to prototype or another helper class
-  static getNextKey(storeObject, currentKey) {
-    let keys = Object.keys(storeObject);
-    
-    if (currentKey === null) {
-      return keys[0];
-    } else {
-      let currIndex = keys.indexOf(currentKey);
-      if (currIndex < 0) {
-        return keys[0];
-      } else if (currIndex === keys.length - 1) {
-        return keys[keys.length - 1];
-      } else {
-        return keys[currIndex + 1];
-      }
-    }
-  }
-  static getPrevKey(storeObject, currentKey) {
-    let keys = Object.keys(storeObject);
-    
-    if (currentKey === null) {
-      return keys[0];
-    } else {
-      let currIndex = keys.indexOf(currentKey);
-      return (currIndex > 1) ? keys[currIndex - 1] : keys[0];
-    }
-  }
-  static highlightKeywords(str, keywords) {
-    function regexEscape(str) {
-      return str.replace(/[[{}()*+?^$|\]\.\\]/g, "\\$&")
-    }
-    
-    const words = keywords.trim().split(' ').map(w => regexEscape(w));
-    const safeRegEx = words.join('|');
-    const containSomeOf = new RegExp(`(${safeRegEx})`, "gi");
-    
-    return str.replace(containSomeOf, '<span>$1</span>');
-  }
-  static objectEqual(obj1, obj2) {
-    let eq = true;
-    
-    const o1Keys = Object.keys(obj1);
-    const o2Keys = Object.keys(obj2);
-  
-    if (o1Keys.length !== o2Keys.length) {
-      eq = false;
-    } else {
-      for (let key of o1Keys) {
-        if (typeof obj2[key] === 'undefined') {
-          eq = false;
-          break;
-        }
-      }
-    }
-    
-    return eq;
-  }
-  
   
   doSearch(keyword) {
 
