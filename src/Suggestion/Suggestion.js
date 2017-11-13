@@ -253,7 +253,7 @@ export default class Suggestion {
   }
   
   initDatabase() {
-    this.logger.log("TODO: initDatabase");
+    //this.logger.log("TODO: initDatabase");
   }
 
   showSuggestion() {
@@ -340,7 +340,7 @@ export default class Suggestion {
   
     // Trigger UI change to input
     const item = this.getDataItemByKey(itemKey);
-    this.updateInputVal(item.name);
+    this.setKeyword(item.name);
   
     this.updateStateFocusedItemKey(itemKey);
     
@@ -600,14 +600,6 @@ export default class Suggestion {
     return eq;
   }
   
-  updateInputVal (val) {
-    this.inputEle.value = val;
-  }
-  
-  updateHistoryList() {
-  
-  }
-  
   
   doSearch(keyword) {
 
@@ -647,9 +639,5 @@ export default class Suggestion {
   }
   setKeyword(keyword) {
     this.inputEle.value = keyword;
-  }
-  
-  getItemByKeyword(keyword) {
-  
   }
 }

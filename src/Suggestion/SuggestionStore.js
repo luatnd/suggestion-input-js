@@ -101,12 +101,6 @@ export default class SuggestionStore {
     return historyItems !== null ? historyItems : {};
   }
   
-  getHistoryItem(itemKey) {
-    const historyItems = this.getHistoryItemKeys();
-  
-    return (typeof historyItems[itemKey] !== 'undefined') ? itemKey[itemKey] : null;
-  }
-  
   isHistoryItemExist(itemKey) {
     const historyItems = this.getHistoryItemKeys();
   
