@@ -3,6 +3,31 @@ polyfill();
 
 import Suggestion from '../../src/Suggestion/Suggestion';
 
+class LocalStorageMock {
+  constructor() {
+    this.store = {};
+  }
+  
+  clear() {
+    this.store = {};
+  }
+  
+  getItem(key) {
+    return this.store[key] || null;
+  }
+  
+  setItem(key, value) {
+    this.store[key] = value.toString();
+  }
+  
+  removeItem(key) {
+    delete this.store[key];
+  }
+};
+
+window.localStorage = new LocalStorageMock();
+
+
 test('Can init with ID', () => {
   document.body.innerHTML =
     `<div>
@@ -59,7 +84,7 @@ test('Can init inputEle', () => {
   const id = "sg-appstore-ios";
   const sgIntance = new Suggestion(id);
   
-  expect(sgIntance.inputEle.getAttribute('data-sg-id')).toBe(id);
+  expect(sgIntance.input.getDomEle().getAttribute('data-sg-id')).toBe(id);
 });
 
 test('Do not overwrite original class', () => {
@@ -72,8 +97,8 @@ test('Do not overwrite original class', () => {
   const id = "sg-appstore-ios";
   const sgIntance = new Suggestion(id);
   
-  expect(sgIntance.inputEle.classList.contains('initialClass1')).toBe(true);
-  expect(sgIntance.inputEle.classList.length).toBe(2);
+  expect(sgIntance.input.getDomEle().classList.contains('initialClass1')).toBe(true);
+  expect(sgIntance.input.getDomEle().classList.length).toBe(2);
 });
 
 

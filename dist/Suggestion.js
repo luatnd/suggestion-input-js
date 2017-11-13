@@ -81,7 +81,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
 else
   window.Suggestion = __WEBPACK_IMPORTED_MODULE_1__Suggestion_Suggestion_js__["a" /* default */];
 
-console.log('plugin: all done');
+//console.log('plugin: all done');
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1)(module)))
 
 /***/ }),

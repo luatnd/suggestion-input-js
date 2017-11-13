@@ -8,4 +8,4 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
 else
   window.Suggestion = Suggestion;
 
-console.log('plugin: all done');
+//console.log('plugin: all done');
