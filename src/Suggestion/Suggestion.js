@@ -329,6 +329,8 @@ export default class Suggestion {
     // Trigger UI change to input
     const item = this.getDataItemByKey(itemKey);
     this.updateInputVal(item.name);
+  
+    this.updateStateFocusedItemKey(itemKey);
   }
   
   /**
@@ -357,6 +359,13 @@ export default class Suggestion {
   
     // Update state
     this.stateFocusedItemKey = focusedItemKey;
+    
+    // Scroll into view only if input was focused
+    if (this.inputEle === document.activeElement) {
+      if (typeof activeNode.scrollIntoView !== 'undefined') {
+        activeNode.scrollIntoView()
+      }
+    }
   }
   
   /**
@@ -463,7 +472,6 @@ export default class Suggestion {
       return keys[0];
     } else {
       let currIndex = keys.indexOf(currentKey);
-      console.log("currIndex: ", currIndex);
       return (currIndex > 1) ? keys[currIndex - 1] : keys[0];
     }
   }
