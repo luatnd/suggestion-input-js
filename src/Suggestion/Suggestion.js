@@ -4,6 +4,9 @@
  *  Init a suggestion box that show the inputted value
  */
 
+import SuggestionLogger from './SuggestionLogger.js';
+import SuggestionStore from './SuggestionStore.js';
+
 // TODO: change all class name into BEM
 // TODO: change this to defaultSetting, and allow to pass the setting
 const setting = {
@@ -72,12 +75,13 @@ export default class Suggestion {
       docKeyDown: null,
     };
     
-    this.logger = new Logger(id, setting.debug);
+    this.logger = new SuggestionLogger(id, setting.debug);
+    this.localStore = new SuggestionStore(id, setting);
     this.inputTimer = null;
     
     this.stateActive = false; // The dropDown is showing (input can focus or not)
     this.stateSuggestItems = {}; // List of item in suggest box
-    this.stateHistoryItems = {}; // List of item in history box
+    //this.stateHistoryItems = {}; // List of item in history box
     this.stateFocusedItemKey = null; // The Focused (up/down key position) item `key` in this.data (get `key` by this.getId(item.id))
     this.stateSelectedItemKey = null; // The selected item `key` in this.data (get `key` by this.getId(item.id))
     
@@ -331,6 +335,10 @@ export default class Suggestion {
     this.updateInputVal(item.name);
   
     this.updateStateFocusedItemKey(itemKey);
+    
+
+    // Save history to DB:
+    this.localStore.addHistoryItem(itemKey);
   }
   
   /**
@@ -389,8 +397,40 @@ export default class Suggestion {
       
       return;
     }
+  
+  
+    /**
+     * ====  HISTORY ITEM APPEND =======
+     * The basic idea is check list items,
+     * if it's is history item then move it to the beginning of the list
+     */
+    let historyItemKeys = this.localStore.getHistoryItemKeys();
+    const suitableHistoryItems = {};
+    let newItems = Object.assign({}, items);
     
-    this.stateSuggestItems = items;
+    for (let key in historyItemKeys) {
+      if (historyItemKeys.hasOwnProperty(key)) {
+        
+        if (typeof items[key] !== 'undefined') {
+          const historyItem = items[key];
+          
+          suitableHistoryItems[key] = Object.assign({}, historyItem, {isHistory: true});
+          delete newItems[key];
+        }
+
+      }
+    }
+    newItems = Object.assign({}, suitableHistoryItems, newItems);
+    
+    //this.logger.log("suitableHistoryItems: ", suitableHistoryItems);
+    //this.logger.log("newItems: ", newItems);
+    /**
+     * ====  END: HISTORY ITEM APPEND =======
+     */
+    
+    
+    this.stateSuggestItems = newItems;
+    
     
     if (this.listNode === null) {
       this.logger.log('ERROR: listNode is null');
@@ -399,9 +439,9 @@ export default class Suggestion {
     
     this.listNode.innerHTML = null;
     
-    for (let key in items) {
-      if (items.hasOwnProperty(key)) {
-        const item = items[key];
+    for (let key in newItems) {
+      if (newItems.hasOwnProperty(key)) {
+        const item = newItems[key];
         
         /*
         <li>
@@ -420,9 +460,6 @@ export default class Suggestion {
         const iDiv = document.createElement('div');
         iDiv.classList.add('flex');
         
-        const iBtn = document.createElement('div');
-        iBtn.classList.add('item-btn');
-        
         const iIcon = document.createElement('img');
         iIcon.classList.add('item-img');
         iIcon.setAttribute('alt', item.name);
@@ -435,7 +472,23 @@ export default class Suggestion {
         iDiv.appendChild(iIcon);
         iDiv.appendChild(iName);
         iNode.appendChild(iDiv);
-        iNode.appendChild(iBtn);
+  
+  
+  
+        /**
+         * Handle History item UI
+         */
+        if (item.isHistory) {
+          iNode.classList.add('his');
+          
+          const iBtn = document.createElement('div');
+          iBtn.classList.add('item-btn');
+          
+          iNode.appendChild(iBtn);
+        }
+        /**
+         * END Handle History item UI
+         */
         
         
         // Append to list
@@ -557,19 +610,5 @@ export default class Suggestion {
   
   getItemByKeyword(keyword) {
   
-  }
-}
-
-class Logger {
-  constructor(id, debug = false) {
-    this.id = id;
-    this.debug = debug;
-  }
-  
-  log() {
-    const args = [].slice.call(arguments);
-    if (setting.debug) {
-      console.log(`[${this.id}]`, ...args);
-    }
   }
 }

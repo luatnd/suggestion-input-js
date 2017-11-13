@@ -89,7 +89,11 @@ $listItemVerticalPadding: 10px;
     padding: $listItemVerticalPadding/2 14px;
 
     transition: background-color 0.2s;
+    border-left: 3px solid transparent;
 
+    &.his{
+      background-color: #d2d2d2; // No glassy
+    }
     &:hover{
       background-color: rgba(222, 222, 222, 0.9); // darker
     }
@@ -98,6 +102,7 @@ $listItemVerticalPadding: 10px;
     }
     &:active, &.focused{
       background-color: rgba(200, 200, 200, 0.7); // darker
+      border-left: 3px solid #16a2b7;
     }
     &.selected{
       background-color: rgba(200, 200, 200, 0.9); // darker
