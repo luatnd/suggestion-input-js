@@ -23,6 +23,31 @@ const setting = {
     }
   },
 }
+const KEY = {
+  AT:              64,
+  BACKSPACE:       8,
+  DELETE:          46,
+  TAB:             9,
+  ESC:             27,
+  RETURN:          13,
+  LEFT:            37,
+  UP:              38,
+  RIGHT:           39,
+  DOWN:            40,
+  SPACE:           32,
+  HOME:            36,
+  END:             35,
+  COMMA:           188,
+  NUMPAD_ADD:      107,
+  NUMPAD_DECIMAL:  110,
+  NUMPAD_DIVIDE:   111,
+  NUMPAD_ENTER:    108,
+  NUMPAD_MULTIPLY: 106,
+  NUMPAD_SUBTRACT: 109,
+  PAGE_DOWN:       34,
+  PAGE_UP:         33,
+  PERIOD:          190,
+};
 export default class Suggestion {
   /**
    *
@@ -44,14 +69,16 @@ export default class Suggestion {
       inputBlur: null,
       docClick: null,
       listClick: null,
+      docKeyDown: null,
     };
     
     this.logger = new Logger(id, setting.debug);
     this.inputTimer = null;
     
     this.stateActive = false; // The dropDown is showing (input can focus or not)
-    this.stateSuggestItems = {};
-    this.stateHistoryItems = {};
+    this.stateSuggestItems = {}; // List of item in suggest box
+    this.stateHistoryItems = {}; // List of item in history box
+    this.stateSelectedItemKey = null; // The selected item `key` in this.data (get `key` by this.getId(item.id))
     
     this.initUI();
     this.updateStateSuggestItems(this.getData()); // Initial suggestion list
@@ -119,6 +146,11 @@ export default class Suggestion {
      * Detect click an list item
      */
     this.listNode.addEventListener('click', this.eventManager.listClick = this.onListNodeClicked.bind(this));
+  
+    /**
+     * Handle keyboard selection
+     */
+    document.addEventListener('keydown', this.eventManager.docKeyDown = this.onDocKeyDown.bind(this));
   }
   
   stopListener() {
@@ -126,6 +158,7 @@ export default class Suggestion {
     this.inputEle.removeEventListener("focus", this.eventManager.inputFocus);
     document.removeEventListener('click', this.eventManager.docClick);
     this.listNode.removeEventListener('click', this.eventManager.listClick);
+    document.removeEventListener('keydown', this.eventManager.docKeyDown);
   }
   
   onInputEleInput () {
@@ -159,10 +192,46 @@ export default class Suggestion {
     }
   }
   
+  onDocKeyDown(event) {
+    // Do not care about some instances else
+    if (this.stateActive) {
+      switch (event.keyCode) {
+        case KEY.DOWN:
+          this.onDownKey();
+          break;
+        case KEY.UP:
+          this.onUpKey();
+          break;
+        case KEY.RETURN:
+          this.onEnterKey();
+          break;
+      }
+    }
+  }
+  
+  onUpKey() {
+this.logger.log('up');
+
+    const nextItemKey = Suggestion.getPrevKey(this.getData(), this.stateSelectedItemKey);
+console.log("nextItemKey: ", nextItemKey);
+    this.updateStateSelectedItemKey(nextItemKey);
+  }
+  
+  onDownKey() {
+this.logger.log('down');
+    const prevItemKey = Suggestion.getNextKey(this.getData(), this.stateSelectedItemKey);
+console.log("prevItemKey: ", prevItemKey);
+    this.updateStateSelectedItemKey(prevItemKey);
+  }
+  
+  onEnterKey() {
+    this.logger.log('Enter');
+  }
+  
   onListNodeClicked(event) {
     const clickedListItem = event.target.closest(`.${setting.suggestionList.className} > ul > li`);
     if (clickedListItem !== null) {
-      const item = this.getDataItemByKey(clickedListItem.getAttribute('data-id'));
+      const item = this.getDataItemByKey(clickedListItem.getAttribute('data-key'));
       this.updateInputVal(item.name);
     } else {
       this.logger.log('Error: Can not found the item?');
@@ -171,21 +240,6 @@ export default class Suggestion {
   
   initDatabase() {
     this.logger.log("TODO: initDatabase");
-  }
-  
-  /**
-   * Using as a setter for stateActive
-   *
-   * @param {boolean} state
-   */
-  updateActiveState(state) {
-    this.stateActive = state;
-    
-    if (this.stateActive) {
-      this.showSuggestion();
-    } else {
-      this.hideSuggestion();
-    }
   }
 
   showSuggestion() {
@@ -199,11 +253,13 @@ export default class Suggestion {
   /**
    * List Items of this suggestion instance
    * Data structure:
-   *    data[app.id] = {
+   *    data[key] = {
    *      id: string,
    *      icon: string,
    *      name: string,
    *    }
+   *    NOTE that: key = "I" + app.id;
+   *    Because we need key:string to control the order, can not control order with key:int
    *
    * @returns {*}
    */
@@ -225,7 +281,50 @@ export default class Suggestion {
     return (typeof this.data[itemKey] !== 'undefined') ? this.data[itemKey] : null;
   }
   
+  
   /**
+   * Using as a setter + trigger UI change.
+   *
+   * @param {boolean} state
+   */
+  updateActiveState(state) {
+    this.stateActive = state;
+    
+    if (this.stateActive) {
+      this.showSuggestion();
+    } else {
+      this.hideSuggestion();
+    }
+  }
+  
+  /**
+   * Using as a setter + trigger UI change.
+   * @param {string} selectedItemKey
+   */
+  updateStateSelectedItemKey(selectedItemKey) {
+    if (selectedItemKey === this.stateSelectedItemKey) {
+      return;
+    }
+    
+    // Remove active from old node
+    if (this.stateSelectedItemKey !== null) {
+      const prevActiveNode = this.listNode.querySelector(`[data-key="${this.stateSelectedItemKey}"]`);
+      prevActiveNode.classList.remove('active');
+    }
+  
+    // Add active to new node
+    const activeNode = this.listNode.querySelector(`[data-key="${selectedItemKey}"]`);
+    if (activeNode) {
+      activeNode.classList.add('active');
+    }
+  
+    // Update state
+    this.stateSelectedItemKey = selectedItemKey;
+  }
+  
+  /**
+   * Using as a setter + trigger UI change.
+   *
    * Do update suggestion list and change the DOM
    * Only do update when items list was different to old items
    *
@@ -270,7 +369,7 @@ export default class Suggestion {
         TODO: Allow configure className of these elements
          */
         const iNode = document.createElement('li');
-        iNode.setAttribute('data-id', key);
+        iNode.setAttribute('data-key', key);
   
         const iDiv = document.createElement('div');
         iDiv.classList.add('flex');
@@ -304,6 +403,32 @@ export default class Suggestion {
   }
   
   // TODO: Move all static fn to prototype or another helper class
+  static getNextKey(storeObject, currentKey) {
+    let keys = Object.keys(storeObject);
+    
+    if (currentKey === null) {
+      return keys[0];
+    } else {
+      let currIndex = keys.indexOf(currentKey);
+      if (currIndex < 0) {
+        return keys[0];
+      } else if (currIndex === keys.length - 1) {
+        return keys[keys.length - 1];
+      } else {
+        return keys[currIndex + 1];
+      }
+    }
+  }
+  static getPrevKey(storeObject, currentKey) {
+    let keys = Object.keys(storeObject);
+    
+    if (currentKey === null) {
+      return keys[0];
+    } else {
+      let currIndex = keys.indexOf(currentKey);
+      return (currIndex > 1) ? keys[currIndex - 1] : keys[0];
+    }
+  }
   static highlightKeywords(str, keywords) {
     function regexEscape(str) {
       return str.replace(/[[{}()*+?^$|\]\.\\]/g, "\\$&")
@@ -345,8 +470,7 @@ export default class Suggestion {
   
   
   doSearch(keyword) {
-    this.logger.log('Show suggestion for ' + keyword);
-  
+
     const matchedItems = search(this.getData(), keyword);
     this.updateStateSuggestItems(matchedItems);
     

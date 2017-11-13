@@ -96,7 +96,7 @@ $listItemVerticalPadding: 10px;
     &:focus{
       background-color: rgba(222, 222, 222, 0.8); // darker
     }
-    &:active{
+    &:active, &.active{
       background-color: rgba(222, 222, 222, 0.7); // darker
     }
   }
