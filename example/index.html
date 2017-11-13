@@ -3,16 +3,51 @@
     <title>The demo</title>
     <meta charset="UTF-8">
 
-    <script src="../dist/InputSuggestion.js" defer></script>
+    <link rel="stylesheet" href="../dist/css/SuggestionStyles.css">
+    <link rel="stylesheet" href="../dist/css/DemoStyles.css">
+
+    <script src="../dist/Suggestion.js" defer></script>
+    <script src="../dist/Demo.js" defer></script>
 </head>
 <body>
-<h1>hello world</h1>
+
+<div class="page">
+    <div class="page--bg-image"></div>
+
+
+
+    <div class="row">
+        <div class="col col-4"></div>
+        <div class="col col-4">
+
+            <h1 class="page-title">Suggestion Plugin</h1>
+
+            <form action="" onsubmit="return onFrmSubmit(this)" class="box-form">
+                <h3 class="box-form--title">Appstore Top Free</h3>
+                <p>The first instance on page</p>
+                <input type="text" data-sg-id="sg-appstore-top-free1" class="inputTransform">
+                <br>
+                <input type="text" data-sg-id="sg-appstore-top-paid1" class="inputTransform">
+                <br>
+                <input type="text" data-sg-id="sg-appstore-top-paid2" class="inputTransform">
+                <br>
+                <button class="submit-btn btn btn-info">Submit</button>
+            </form>
+
+
+        </div>
+        <div class="col col-4"></div>
+    </div>
+    <div class="row" style="height: 200px"></div>
+</div>
 
 
 <script>
-  window.addEventListener('DOMContentLoaded', function () {
-    var sgInstance1 = new InputSuggestion('sg-appstore-ios');
-  });
+  function onFrmSubmit (formEle) {
+    alert('Input value: ' + formEle.querySelector('input[data-sg-id]').value)
+
+    return false;
+  }
 </script>
 </body>
 </html>
