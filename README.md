@@ -2,6 +2,11 @@
 A pure JS plugin which transform input into a suggestion-able input.
 Support keyboard, mouse, history.
 
+Demo:
+```
+open example/index.html
+```
+
 # How to use
 ### Quickstart
 
